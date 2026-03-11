@@ -272,7 +272,7 @@ export default function GenerateClient() {
                 </Typography>
                 <Stack spacing={1.25} sx={{ mt: 2 }}>
                   <Chip
-                    label="Clean terminology"
+                    label="Clear terminology"
                     sx={{
                       justifyContent: 'flex-start',
                       height: 30,
@@ -329,7 +329,7 @@ export default function GenerateClient() {
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}
+                  sx={{ py: 1, mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}
                 >
                   Generated cards appear below as interactive tiles. Click any card to flip between
                   question and answer.

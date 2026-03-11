@@ -138,7 +138,7 @@ export default function AppShell({
                         },
                       }}
                     >
-                      Billing
+                      Plan
                     </Button>
                     <Box sx={{ px: 2, display: 'flex', flexShrink: 0 }}>
                       <UserButton />

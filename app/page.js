@@ -148,7 +148,7 @@ export default function Home() {
           <Grid item xs={12} md={7}>
             <Stack spacing={3}>
               <Chip
-                label="AI flashcards for focused revision"
+                label="AI flashcard set generator"
                 sx={{
                   alignSelf: 'flex-start',
                   px: 1,
@@ -161,7 +161,7 @@ export default function Home() {
                 Smarter flashcards for faster learning.
               </Typography>
               <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 640, lineHeight: 1.8 }}>
-                FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time studying it.
+                FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time reviewing it.
               </Typography>
               <Stack sx={{ pb: 3 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                 <Button component={Link} href="/generate" variant="contained" size="large">
