@@ -10,7 +10,17 @@ import {
   getStripeClient,
 } from '@/lib/stripe';
 
-const stripe = getStripeClient();
+function getErrorMessage(error, fallbackMessage) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === 'string' && error.trim()) {
+    return error;
+  }
+
+  return fallbackMessage;
+}
 
 export async function POST(req) {
   const { userId } = await auth();
@@ -18,7 +28,14 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { planId } = await req.json();
+  let requestPayload = {};
+  try {
+    requestPayload = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+  }
+
+  const { planId } = requestPayload;
 
   if (!planId) {
     return NextResponse.json({ error: 'Missing planId' }, { status: 400 });
@@ -28,39 +45,43 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Invalid plan selection.' }, { status: 400 });
   }
 
-  const origin = getAppUrl(req.headers.get('origin'));
+  try {
+    const stripe = getStripeClient();
+    const origin = getAppUrl(req.headers.get('origin'));
 
-  const params = {
-    mode: 'subscription',
-    allow_promotion_codes: true,
-    customer: await ensureStripeCustomer(userId),
-    line_items: [
-      {
-        price: getPlanPriceId(planId),
-        quantity: 1,
-      },
-    ],
-    success_url: `${origin}/result?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/result?canceled=1&planId=${planId}`,
-    client_reference_id: userId,
-    metadata: {
-      clerkUserId: userId,
-      planId,
-    },
-    subscription_data: {
+    const params = {
+      mode: 'subscription',
+      allow_promotion_codes: true,
+      customer: await ensureStripeCustomer(userId),
+      line_items: [
+        {
+          price: getPlanPriceId(planId),
+          quantity: 1,
+        },
+      ],
+      success_url: `${origin}/result?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/result?canceled=1&planId=${planId}`,
+      client_reference_id: userId,
       metadata: {
         clerkUserId: userId,
         planId,
       },
-    },
-  };
+      subscription_data: {
+        metadata: {
+          clerkUserId: userId,
+          planId,
+        },
+      },
+    };
 
-  try {
     const checkoutSession = await stripe.checkout.sessions.create(params);
     return NextResponse.json({ id: checkoutSession.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Failed to create checkout session.') },
+      { status: 500 },
+    );
   }
 }
 
@@ -78,6 +99,7 @@ export async function GET(req) {
   }
 
   try {
+    const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['customer', 'subscription', 'subscription.items.data.price'],
     });
@@ -126,6 +148,9 @@ export async function GET(req) {
     });
   } catch (error) {
     console.error('Error retrieving checkout session:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: getErrorMessage(error, 'Failed to retrieve checkout session.') },
+      { status: 500 },
+    );
   }
 }
