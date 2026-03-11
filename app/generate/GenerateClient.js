@@ -17,25 +17,32 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { doc, collection, getDoc, writeBatch } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { useUser } from '@clerk/nextjs';
 import AppShell from '@/components/AppShell';
 
 export default function GenerateClient() {
+  const { user, isLoaded } = useUser();
   const [text, setText] = useState('');
   const [flashcards, setFlashcards] = useState([]);
   const [setName, setSetName] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
   const [flipped, setFlipped] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
+    if (isLoaded && !user) {
+      setError('Please sign in to generate flashcards.');
+      return;
+    }
+
     if (!text.trim()) {
       setError('Please enter some text to generate flashcards.');
       return;
+
     }
 
     try {
@@ -72,42 +79,52 @@ export default function GenerateClient() {
     });
   };
 
-  const handleOpenDialog = () => setDialogOpen(true);
-  const handleCloseDialog = () => setDialogOpen(false);
+  const handleOpenDialog = () => {
+    setSaveError(null);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSaveError(null);
+    setDialogOpen(false);
+  };
 
   const saveFlashcards = async () => {
-    setError(null);
+    setSaveError(null);
+    if (isLoaded && !user) {
+      setSaveError('Please sign in to save flashcards.');
+      return;
+    }
+
     if (!setName.trim()) {
-      setError('Please enter a name for your flashcard set.');
+      setSaveError('Please enter a name for your flashcard set.');
       return;
     }
 
     try {
       setIsSaving(true);
-      const userDocRef = doc(collection(db, 'users'), 'user-id');
-      const userDocSnap = await getDoc(userDocRef);
+      const response = await fetch('/api/flashcard-sets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          setName,
+          flashcards,
+        }),
+      });
 
-      const batch = writeBatch(db);
-
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        const updatedSets = [...(userData.flashcardSets || []), { name: setName }];
-        batch.update(userDocRef, { flashcardSets: updatedSets });
-      } else {
-        batch.set(userDocRef, { flashcardSets: [{ name: setName }] });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save flashcards');
       }
-
-      const setDocRef = doc(collection(userDocRef, 'flashcardSets'), setName);
-      batch.set(setDocRef, { flashcards });
-
-      await batch.commit();
 
       alert('Flashcards saved successfully!');
       handleCloseDialog();
       setSetName('');
     } catch (error) {
       console.error('Error saving flashcards:', error);
-      setError('An error occurred while saving flashcards. Please try again.');
+      setSaveError(error.message || 'An error occurred while saving flashcards. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -121,7 +138,7 @@ export default function GenerateClient() {
     >
       <Grid container spacing={3.5}>
         <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 6 }}>
+          <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
             <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
               <Stack spacing={2.5}>
                 <Box>
@@ -141,17 +158,18 @@ export default function GenerateClient() {
                   rows={12}
                 />
 
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between">
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Keep the source focused and well-structured for clearer prompts and answers.
-                  </Typography>
-                  <Button variant="contained" onClick={handleSubmit} disabled={isGenerating}>
-                    {isGenerating ? 'Generating...' : 'Generate flashcards'}
-                  </Button>
-                </Stack>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={isGenerating}
+                  fullWidth
+                  sx={{ py: 1.5, borderRadius: 3 }}
+                >
+                  {isGenerating ? 'Generating...' : 'Generate cards'}
+                </Button>
 
                 {error ? (
-                  <Box sx={{ px: 2, py: 1.5, borderRadius: 4, bgcolor: 'rgba(248, 113, 113, 0.10)', border: '1px solid rgba(248, 113, 113, 0.18)' }}>
+                  <Box sx={{ px: 5, py: 1.5, borderRadius: 4, bgcolor: 'rgba(248, 113, 113, 0.10)', border: '1px solid rgba(248, 113, 113, 0.18)' }}>
                     <Typography color="error" variant="body2">
                       {error}
                     </Typography>
@@ -164,7 +182,7 @@ export default function GenerateClient() {
 
         <Grid item xs={12} md={4}>
           <Stack spacing={3}>
-            <Card sx={{ borderRadius: 6 }}>
+            <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
               <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
                 <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.08rem' } }}>
                   What makes a good input?
@@ -177,7 +195,7 @@ export default function GenerateClient() {
               </CardContent>
             </Card>
 
-            <Card sx={{ borderRadius: 6, background: 'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))' }}>
+            <Card sx={{ py: 1, px: 5, borderRadius: 6, background: 'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))' }}>
               <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
                 <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
                   Preview
@@ -253,17 +271,17 @@ export default function GenerateClient() {
                             p: 2.25,
                           }}
                         >
-                          <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
                             Prompt
                           </Typography>
                           <Typography
                             variant="body1"
                             align="center"
-                            sx={{ fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
+                            sx={{ px: 4, fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
                           >
                             {flashcard.front}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
                             Click to flip
                           </Typography>
                         </Box>
@@ -281,17 +299,17 @@ export default function GenerateClient() {
                             background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
                           }}
                         >
-                          <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
                             Answer
                           </Typography>
                           <Typography
                             variant="body2"
                             align="center"
-                            sx={{ fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
+                            sx={{ px: 4, fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
                           >
                             {flashcard.back}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
                             Click to flip back
                           </Typography>
                         </Box>
@@ -310,6 +328,8 @@ export default function GenerateClient() {
         onClose={handleCloseDialog}
         PaperProps={{
           sx: {
+            px: 5,
+            py: 3,
             borderRadius: 6,
             border: '1px solid rgba(148, 163, 184, 0.14)',
             background: 'rgba(11, 16, 32, 0.94)',
@@ -329,8 +349,29 @@ export default function GenerateClient() {
             type="text"
             fullWidth
             value={setName}
-            onChange={(e) => setSetName(e.target.value)}
+            onChange={(e) => {
+              setSetName(e.target.value);
+              if (saveError) {
+                setSaveError(null);
+              }
+            }}
           />
+          {saveError ? (
+            <Box
+              sx={{
+                mt: 2,
+                px: 2,
+                py: 1.5,
+                borderRadius: 4,
+                bgcolor: 'rgba(248, 113, 113, 0.10)',
+                border: '1px solid rgba(248, 113, 113, 0.18)',
+              }}
+            >
+              <Typography color="error" variant="body2">
+                {saveError}
+              </Typography>
+            </Box>
+          ) : null}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={handleCloseDialog} color="inherit" sx={{ color: 'text.secondary' }}>

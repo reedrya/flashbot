@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { auth } from '@clerk/nextjs/server';
+import Groq from 'groq-sdk';
+import { NextResponse } from 'next/server';
 
-const defaultGroqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+const defaultGroqModel = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
 const systemPrompt = `
 You are a flashcard creator. Your task is to generate concise and effective flashcards based on the given topic or content. Please follow these guidelines:
@@ -30,53 +31,58 @@ Return in the following JSON format:
 `;
 
 export async function POST(req) {
-    try {
-        if (!process.env.GROQ_API_KEY) {
-            return NextResponse.json(
-                { error: 'Missing GROQ_API_KEY. Add it to your .env.local file and restart the dev server.' },
-                { status: 500 }
-            );
-        }
-
-        const { text } = await req.json();
-
-        if (!text || !text.trim()) {
-            return NextResponse.json(
-                { error: 'Please provide text to generate flashcards.' },
-                { status: 400 }
-            );
-        }
-
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const completion = await groq.chat.completions.create({
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: text },
-            ],
-            model: defaultGroqModel,
-            response_format: { type: 'json_object' }, 
-        });
-
-        const content = completion.choices[0].message.content;
-
-        let flashcards;
-        try {
-            flashcards = JSON.parse(content);
-        } catch (parseError) {
-            console.error('Failed to parse JSON response:', parseError);
-            throw new Error('Failed to parse JSON response');
-        }
-
-        if (!flashcards.flashcards || !Array.isArray(flashcards.flashcards)) {
-            throw new Error('Invalid response format');
-        }
-
-        return NextResponse.json(flashcards);
-    } catch (error) {
-        console.error('Error generating flashcards:', error);
-        return NextResponse.json(
-            { error: error.message || 'An error occurred while generating flashcards. Please try again.' },
-            { status: 500 }
-        );
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    if (!process.env.GROQ_API_KEY) {
+      return NextResponse.json(
+        { error: 'Missing GROQ_API_KEY. Add it to your .env.local file and restart the dev server.' },
+        { status: 500 },
+      );
+    }
+
+    const { text } = await req.json();
+
+    if (!text || !text.trim()) {
+      return NextResponse.json(
+        { error: 'Please provide text to generate flashcards.' },
+        { status: 400 },
+      );
+    }
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const completion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: text },
+      ],
+      model: defaultGroqModel,
+      response_format: { type: 'json_object' },
+    });
+
+    const content = completion.choices[0].message.content;
+
+    let flashcards;
+    try {
+      flashcards = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Failed to parse JSON response:', parseError);
+      throw new Error('Failed to parse JSON response');
+    }
+
+    if (!flashcards.flashcards || !Array.isArray(flashcards.flashcards)) {
+      throw new Error('Invalid response format');
+    }
+
+    return NextResponse.json(flashcards);
+  } catch (error) {
+    console.error('Error generating flashcards:', error);
+    return NextResponse.json(
+      { error: error.message || 'An error occurred while generating flashcards. Please try again.' },
+      { status: 500 },
+    );
+  }
 }

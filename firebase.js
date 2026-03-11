@@ -1,28 +1,20 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCeAEJJxfKZyRvSNIFST0fn_L6RUXI-z7Q",
-  authDomain: "flashcardsaas-f830e.firebaseapp.com",
-  projectId: "flashcardsaas-f830e",
-  storageBucket: "flashcardsaas-f830e.appspot.com",
-  messagingSenderId: "1099030063270",
-  appId: "1:1099030063270:web:14866db714e2666f112c67",
-  measurementId: "G-P0M58YD3PJ"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Firestore
-const db = getFirestore(app);
-
-// Initialize Analytics only on the client-side
 let analytics;
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);
@@ -30,4 +22,4 @@ if (typeof window !== "undefined") {
   });
 }
 
-export { db, analytics };
+export { app, analytics };

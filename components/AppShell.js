@@ -76,7 +76,34 @@ export default function AppShell({
                   </Stack>
                 </SignedOut>
                 <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <Button
+                      component={Link}
+                      href="/flashcards"
+                      color="inherit"
+                      variant={pathname === '/flashcards' || pathname === '/flashcard' ? 'contained' : 'text'}
+                      sx={{
+                        px: 2,
+                        color:
+                          pathname === '/flashcards' || pathname === '/flashcard'
+                            ? '#08111f'
+                            : 'text.secondary',
+                        bgcolor:
+                          pathname === '/flashcards' || pathname === '/flashcard'
+                            ? 'primary.main'
+                            : 'transparent',
+                        '&:hover': {
+                          bgcolor:
+                            pathname === '/flashcards' || pathname === '/flashcard'
+                              ? 'primary.main'
+                              : 'rgba(148, 163, 184, 0.08)',
+                        },
+                      }}
+                    >
+                      My Sets
+                    </Button>
+                    <UserButton />
+                  </Stack>
                 </SignedIn>
               </>
             ) : (

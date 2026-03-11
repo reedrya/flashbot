@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Grid, Card, CardActionArea, CardContent, Typography, Box } from '@mui/material';
-import { doc, collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { Alert, Box, Button, Card, CardActionArea, CardContent, Chip, CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import AppShell from '@/components/AppShell';
 
 export default function Flashcard() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [flashcards, setFlashcards] = useState([]);
+  const [setName, setSetName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [flipped, setFlipped] = useState({});
 
   const searchParams = useSearchParams();
@@ -17,19 +20,51 @@ export default function Flashcard() {
 
   useEffect(() => {
     async function getFlashcard() {
-      if (!search || !user) return;
+      if (!isLoaded) {
+        return;
+      }
 
-      const colRef = collection(doc(collection(db, 'users'), user.id), search);
-      const docs = await getDocs(colRef);
-      const flashcards = [];
-      docs.forEach((doc) => {
-        flashcards.push({ id: doc.id, ...doc.data() });
-      });
-      setFlashcards(flashcards);
-      setFlipped(flashcards.reduce((acc, card) => ({ ...acc, [card.id]: false }), {})); // Initialize flipped state for each card
+      if (!search) {
+        setError('Missing flashcard set id.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!user) {
+        setError('Sign in to view this flashcard set.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError('');
+        const response = await fetch(`/api/flashcard-sets/${encodeURIComponent(search)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load flashcards');
+        }
+
+        const loadedFlashcards = data.flashcardSet?.flashcards || [];
+        setSetName(data.flashcardSet?.name || 'Flashcards');
+        setFlashcards(loadedFlashcards);
+        setFlipped(
+          loadedFlashcards.reduce(
+            (acc, _card, index) => ({ ...acc, [index]: false }),
+            {},
+          ),
+        );
+      } catch (loadError) {
+        console.error('Error loading flashcards:', loadError);
+        setError(loadError.message || 'Failed to load flashcards.');
+      } finally {
+        setIsLoading(false);
+      }
     }
+
     getFlashcard();
-  }, [search, user]);
+  }, [isLoaded, search, user]);
 
   const handleCardClick = (id) => {
     setFlipped((prev) => ({
@@ -39,111 +74,133 @@ export default function Flashcard() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ marginTop: 4 }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        sx={{
-          color: '#00c6ff',
-          textAlign: 'center',
-          fontFamily: 'Roboto, Arial, sans-serif',
-          marginBottom: 4,
-        }}
-      >
-        Flashcards
-      </Typography>
-      <Grid container spacing={3}>
-        {flashcards.map((flashcard) => (
-          <Grid item xs={12} sm={6} md={4} key={flashcard.id}>
-            <Card
+    <AppShell
+      eyebrow="Review"
+      title={setName || 'Flashcards'}
+      description="Click a card to flip it."
+    >
+      <Box sx={{ display: 'grid', gap: { xs: 4, md: 6 } }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Chip
+              label={`${flashcards.length} card${flashcards.length === 1 ? '' : 's'}`}
               sx={{
-                backgroundColor: '#444',  // Dark grey background for flashcards
-                color: '#fff',
-                borderRadius: 2,
-                '&:hover': {
-                  boxShadow: '0 4px 20px rgba(0, 198, 255, 0.2)',
-                },
+                bgcolor: 'rgba(142, 168, 255, 0.12)',
+                color: 'primary.main',
+                border: '1px solid rgba(142, 168, 255, 0.18)',
               }}
-            >
-              <CardActionArea onClick={() => handleCardClick(flashcard.id)}>
-                <CardContent sx={{ padding: '20px', textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      perspective: '1000px',
-                      position: 'relative',
-                      width: '100%',
-                      height: '200px',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        transition: 'transform 0.6s',
-                        transformStyle: 'preserve-3d',
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        transform: flipped[flashcard.id] ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                      }}
-                    >
+            />
+          </Stack>
+          <Button
+            component={Link}
+            href="/flashcards"
+            variant="outlined"
+            sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
+          >
+            Back
+          </Button>
+        </Stack>
+
+        {error ? <Alert severity="error">{error}</Alert> : null}
+        {!isLoading && !error && flashcards.length === 0 ? <Alert severity="info">This set is empty.</Alert> : null}
+
+        {!isLoaded || isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : null}
+
+        {!isLoading && !error && flashcards.length > 0 ? (
+          <Grid container spacing={3}>
+            {flashcards.map((flashcard, index) => (
+              <Grid item xs={12} sm={6} md={4} key={`${flashcard.front}-${index}`}>
+                <Card
+                  onClick={() => handleCardClick(index)}
+                  sx={{
+                    height: 252,
+                    cursor: 'pointer',
+                    borderRadius: 6,
+                    transition: 'transform 0.25s ease, border-color 0.25s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      borderColor: 'rgba(142, 168, 255, 0.3)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ height: '100%', p: 0 }}>
+                    <Box sx={{ perspective: '1000px', position: 'relative', width: '100%', height: '100%' }}>
                       <Box
                         sx={{
+                          transition: 'transform 0.6s',
+                          transformStyle: 'preserve-3d',
                           position: 'absolute',
                           width: '100%',
                           height: '100%',
-                          backfaceVisibility: 'hidden',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          padding: 2,
-                          boxSizing: 'border-box',
+                          transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0deg)',
                         }}
                       >
-                        <Typography
-                          variant="h6"  // Slightly smaller font size
-                          component="div"
+                        <Box
                           sx={{
-                            fontFamily: 'Roboto, Arial, sans-serif',
-                            color: '#00c6ff',
-                            overflowWrap: 'break-word',  // Prevents overflow of text
+                            position: 'absolute',
+                            inset: 0,
+                            backfaceVisibility: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            p: 2.25,
                           }}
                         >
-                          {flashcard.front}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          backfaceVisibility: 'hidden',
-                          transform: 'rotateY(180deg)',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          padding: 2,
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        <Typography
-                          variant="h6"  // Slightly smaller font size
-                          component="div"
+                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                            Front
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="center"
+                            sx={{ px: 4, fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
+                          >
+                            {flashcard.front}
+                          </Typography>
+                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                            Tap to flip
+                          </Typography>
+                        </Box>
+
+                        <Box
                           sx={{
-                            fontFamily: 'Roboto, Arial, sans-serif',
-                            color: '#00c6ff',
-                            overflowWrap: 'break-word',  // Prevents overflow of text
+                            position: 'absolute',
+                            inset: 0,
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            p: 2.25,
+                            background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
                           }}
                         >
-                          {flashcard.back}
-                        </Typography>
+                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                            Back
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            align="center"
+                            sx={{ px: 4, fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
+                          >
+                            {flashcard.back}
+                          </Typography>
+                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                            Tap to flip
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Container>
+        ) : null}
+      </Box>
+    </AppShell>
   );
 }

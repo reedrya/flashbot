@@ -27,5 +27,5 @@ export default function RootLayout({ children }) {
     return content;
   }
 
-  return <ClerkProvider>{content}</ClerkProvider>;
+  return <ClerkProvider afterSignOutUrl="/">{content}</ClerkProvider>;
 }

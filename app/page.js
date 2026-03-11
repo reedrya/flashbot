@@ -1,5 +1,6 @@
 'use client';
 import { Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } from '@mui/material';
+import Image from 'next/image';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import getStripe from '@/utils/get-stripe';
@@ -97,7 +98,7 @@ export default function Home() {
               <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 640, lineHeight: 1.8 }}>
                 FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time studying it.
               </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+              <Stack sx={{ pb: 3 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                 <Button component={Link} href="/generate" variant="contained" size="large">
                   Start generating
                 </Button>
@@ -112,11 +113,97 @@ export default function Home() {
                 </Button>
               </Stack>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <Box sx={{ px: 2.5, py: 1.5, borderRadius: 4, bgcolor: 'rgba(17, 24, 45, 0.72)', border: '1px solid rgba(148, 163, 184, 0.12)' }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <Box sx={{ px: 1, py: 2, borderRadius: 4, bgcolor: 'rgba(17, 24, 45, 0.72)', border: '1px solid rgba(148, 163, 184, 0.12)', minWidth: 240 }}>
+                  <Typography variant="caption" sx={{pl: 6, color: 'text.secondary', mb: 0.5 }}>
                     Built with
                   </Typography>
-                  <Typography variant="body1">Next.js, Clerk, Firebase, Groq, Stripe</Typography>
+                  <Box
+                    sx={{
+                      py: 1,
+                      px: 5,
+                      pt: 0.5,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(3, minmax(0, 1fr))' },
+                      gap: 1,
+                      '& > *': {
+                        width: '100%',
+                        justifyContent: 'flex-start',
+                      },
+                    }}
+                  >
+                    <Button
+                      component="a"
+                      href="https://nextjs.org"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<Image src="/images/nextjs-white-icon.png" alt="Next.js" width={22} height={22} />}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#d1d5db', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Next.js"
+                    >
+                      Next.js
+                    </Button>
+                    <Button
+                      component="a"
+                      href="https://firebase.google.com/"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<Image src="/images/firebase-logo.svg" alt="Firebase" width={22} height={22} />}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#FFCA28', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Firebase"
+                    >
+                      Firebase
+                    </Button>
+                    <Button
+                      component="a"
+                      href="https://groq.com/"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<Image src="/images/groq-logo.svg" alt="Groq" width={22} height={22} />}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#f59e0b', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Groq"
+                    >
+                      Groq
+                    </Button>
+                    <Button
+                      component="a"
+                      href="https://stripe.com/"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<svg width="22" height="22" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#635bff"/><text x="50%" y="57%" dominantBaseline="middle" textAnchor="middle" fontSize="25" fontWeight="bold" fill="#fff">S</text></svg>}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#635bff', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Stripe"
+                    >
+                      Stripe
+                    </Button>
+                    <Button
+                      component="a"
+                      href="https://mui.com/material-ui/"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<Image src="/images/mui-logo.svg" alt="Material UI" width={22} height={22} />}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#38BDF8', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Material UI"
+                    >
+                      Material UI
+                    </Button>
+                    <Button
+                      component="a"
+                      href="https://clerk.com"
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      startIcon={<Image src="/images/clerk-logo.svg" alt="Clerk" width={22} height={22} />}
+                      sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#d1d5db', bgcolor: 'rgba(255,255,255,0.08)' } }}
+                      aria-label="Clerk"
+                    >
+                      Clerk
+                    </Button>
+                  </Box>
                 </Box>
               </Stack>
             </Stack>
@@ -145,24 +232,24 @@ export default function Home() {
                       Neural networks learn patterns by adjusting weights during training and using those learned patterns to make predictions on unseen data.
                     </Typography>
                   </Box>
-                  <Box sx={{ px: 4.25, py: 2.75, borderRadius: 5, bgcolor: 'rgba(17, 24, 45, 0.84)', border: '1px solid rgba(148, 163, 184, 0.12)' }}>
+                  <Box sx={{ px: 5, py: 3, borderRadius: 5, bgcolor: 'rgba(17, 24, 45, 0.84)', border: '1px solid rgba(148, 163, 184, 0.12)' }}>
                     <Typography variant="overline" sx={{ pl: 2, pt: 1.75, color: 'primary.main', lineHeight: 1 }}>
                       Output
                     </Typography>
                     <Stack spacing={1.5} sx={{ mt: 0.75 }}>
-                      <Box sx={{ px: 3.25, py: 2.25, borderRadius: 4, bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-                        <Typography variant="body2" sx={{color: 'text.secondary' }}>
+                      <Box sx={{ px: 3.75, py: 2.5, borderRadius: 4, bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+                        <Typography variant="body2" sx={{px: 1, color: 'text.secondary' }}>
                           Front
                         </Typography>
-                        <Typography variant="body1" sx={{ mt: 0.5 }}>
+                        <Typography variant="body1" sx={{ px: 1.5, mt: 0.5 }}>
                           How do neural networks improve during training?
                         </Typography>
                       </Box>
                       <Box sx={{ px: 3.25, py: 2.25, borderRadius: 4, bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-                        <Typography variant="body2" sx={{color: 'text.secondary' }}>
+                        <Typography variant="body2" sx={{px: 1, pt: 1,color: 'text.secondary' }}>
                           Back
                         </Typography>
-                        <Typography variant="body1" sx={{ mt: 0.5 }}>
+                        <Typography variant="body1" sx={{ px: 1.5, pb: 1, mt: 0.5 }}>
                           They adjust weights based on errors so future predictions become more accurate.
                         </Typography>
                       </Box>
@@ -175,34 +262,12 @@ export default function Home() {
         </Grid>
 
         <Box>
-          <Stack spacing={1.5} sx={{ mb: 4 }}>
+          <Stack spacing={1} sx={{ mb: -4.5 }}>
             <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
               Why it works
             </Typography>
             <Typography variant="h3">Everything important stays simple.</Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 720, lineHeight: 1.8 }}>
-              The experience is built to keep your workflow clear: paste material, generate focused cards, and return to review without unnecessary friction.
-            </Typography>
           </Stack>
-          <Grid container spacing={3}>
-            {features.map((feature) => (
-              <Grid item xs={12} md={4} key={feature.title}>
-                <Card sx={{ height: '100%', borderRadius: 6 }}>
-                  <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
-                    <Typography
-                      variant="h6"
-                      sx={{ mb: 1, fontSize: { xs: '1.1rem', md: '1.2rem' }, lineHeight: 1.2 }}
-                    >
-                      {feature.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
         </Box>
 
         <Grid container spacing={3}>
@@ -214,7 +279,7 @@ export default function Home() {
                 </Typography>
                 <Stack spacing={1.75} sx={{ pl: 3, pb: 1, mt: 1.75 }}>
                   {workflow.map((step, index) => (
-                    <Box key={step} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                    <Box key={step} sx={{ px: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
                       <Box
                         sx={{
                           width: 32,
@@ -242,13 +307,13 @@ export default function Home() {
           <Grid item xs={12} md={6}>
             <Card sx={{ height: '100%', borderRadius: 6, background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.92))' }}>
               <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
-                <Typography variant="overline" sx={{ pl: 2.5, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                <Typography variant="overline" sx={{ px: 3, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
                   Built for daily use
                 </Typography>
-                <Typography variant="h5" sx={{ pl: 1.5, mt: 1.25, fontSize: { xs: '1.45rem', md: '1.8rem' }, lineHeight: 1.12 }}>
+                <Typography variant="h5" sx={{ px: 2.5, mt: 1.25, fontSize: { xs: '1.45rem', md: '1.8rem' }, lineHeight: 1.12 }}>
                   A focused interface that keeps the study session moving.
                 </Typography>
-                <Typography variant="body2" sx={{ pl: 1.5, mt: 1.25, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
+                <Typography variant="body2" sx={{ px: 2.5, pb: 1, mt: 1.25, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
                   FlashBot is designed to help you move quickly from collecting information to actively reviewing it, with less setup and less visual noise.
                 </Typography>
               </CardContent>
@@ -268,6 +333,8 @@ export default function Home() {
               <Grid item xs={12} md={6} key={plan.name}>
                 <Card
                   sx={{
+                    px: 3,
+                    py: 1,
                     height: '100%',
                     borderRadius: 6,
                     background: plan.featured
