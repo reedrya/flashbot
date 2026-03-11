@@ -51,13 +51,34 @@ export default function Home() {
         body: JSON.stringify({ planId }),
       });
 
-      const session = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      let payload = null;
 
-      if (session.error) {
-        console.error('Stripe session creation failed:', session.error);
-        alert(`Error: ${session.error}`);
+      if (contentType.includes('application/json')) {
+        payload = await response.json();
+      } else {
+        const text = await response.text();
+        if (text) {
+          try {
+            payload = JSON.parse(text);
+          } catch {
+            payload = { error: text };
+          }
+        } else {
+          payload = {};
+        }
+      }
+
+      if (!response.ok || payload.error) {
+        const message =
+          payload?.error ||
+          `Failed to start checkout (status ${response.status || 'unknown'}).`;
+        console.error('Stripe session creation failed:', message);
+        alert(`Error: ${message}`);
         return;
       }
+
+      const session = payload;
 
       const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
 
