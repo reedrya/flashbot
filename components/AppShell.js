@@ -83,7 +83,8 @@ export default function AppShell({
                       color="inherit"
                       variant={pathname === '/flashcards' || pathname === '/flashcard' ? 'contained' : 'text'}
                       sx={{
-                        px: 2,
+                        px: 4,
+                        whiteSpace: 'nowrap',
                         color:
                           pathname === '/flashcards' || pathname === '/flashcard'
                             ? '#08111f'

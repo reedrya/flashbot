@@ -1,17 +1,16 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
 import { SignUp } from '@clerk/nextjs';
-import AppShell from '@/components/AppShell';
+import AuthLayout from '@/components/AuthLayout';
 import clerkAppearance from '@/components/clerkAppearance';
 
 const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function SignUpPage() {
   return (
-    <AppShell
+    <AuthLayout
       eyebrow="Authentication"
       title="Create your account."
       description="Create an account to save flashcard sets, return to your material, and keep your study workflow organized."
-      maxWidth="md"
     >
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         {isClerkConfigured ? (
@@ -28,6 +27,6 @@ export default function SignUpPage() {
           </Card>
         )}
       </Box>
-    </AppShell>
+    </AuthLayout>
   );
 }

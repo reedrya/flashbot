@@ -1,17 +1,16 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
 import { SignIn } from '@clerk/nextjs';
-import AppShell from '@/components/AppShell';
+import AuthLayout from '@/components/AuthLayout';
 import clerkAppearance from '@/components/clerkAppearance';
 
 const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function SignInPage() {
   return (
-    <AppShell
+    <AuthLayout
       eyebrow="Authentication"
       title="Welcome back."
       description="Sign in to generate new flashcards, manage your saved sets, and continue your study sessions."
-      maxWidth="md"
     >
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         {isClerkConfigured ? (
@@ -28,6 +27,6 @@ export default function SignInPage() {
           </Card>
         )}
       </Box>
-    </AppShell>
+    </AuthLayout>
   );
 }

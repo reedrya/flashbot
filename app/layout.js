@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import ThemeProviderClient from "@/components/ThemeProviderClient";
+import clerkAppearance from "@/components/clerkAppearance";
 
 const inter = Inter({ subsets: ["latin"] });
 const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -27,5 +28,9 @@ export default function RootLayout({ children }) {
     return content;
   }
 
-  return <ClerkProvider afterSignOutUrl="/">{content}</ClerkProvider>;
+  return (
+    <ClerkProvider appearance={clerkAppearance} afterSignOutUrl="/">
+      {content}
+    </ClerkProvider>
+  );
 }
