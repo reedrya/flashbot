@@ -2,23 +2,24 @@
 
 import { useState } from 'react';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
   Box,
-  Grid,
+  Button,
   Card,
   CardContent,
+  Chip,
   Dialog,
-  DialogTitle,
+  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogActions,
+  DialogTitle,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { doc, collection, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useRouter } from 'next/navigation';
+import AppShell from '@/components/AppShell';
 
 export default function GenerateClient() {
   const [text, setText] = useState('');
@@ -27,7 +28,8 @@ export default function GenerateClient() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState(null);
   const [flipped, setFlipped] = useState([]);
-  const router = useRouter();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
@@ -37,6 +39,7 @@ export default function GenerateClient() {
     }
 
     try {
+      setIsGenerating(true);
       const response = await fetch('/api/generate', {
         method: 'POST',
         body: JSON.stringify({ text }),
@@ -45,16 +48,19 @@ export default function GenerateClient() {
         },
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to generate flashcards');
+        throw new Error(data.error || 'Failed to generate flashcards');
       }
 
-      const data = await response.json();
       setFlashcards(data.flashcards || []);
       setFlipped(new Array(data.flashcards.length).fill(false));
     } catch (error) {
       console.error('Error generating flashcards:', error);
-      setError('An error occurred while generating flashcards. Please try again.');
+      setError(error.message || 'An error occurred while generating flashcards. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -77,6 +83,7 @@ export default function GenerateClient() {
     }
 
     try {
+      setIsSaving(true);
       const userDocRef = doc(collection(db, 'users'), 'user-id');
       const userDocSnap = await getDoc(userDocRef);
 
@@ -101,211 +108,239 @@ export default function GenerateClient() {
     } catch (error) {
       console.error('Error saving flashcards:', error);
       setError('An error occurred while saving flashcards. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#00c6ff' }}>
-          Generate Flashcards
-        </Typography>
-        <TextField
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          label="Enter text"
-          fullWidth
-          multiline
-          rows={4}
-          variant="outlined"
-          sx={{
-            mb: 2,
-            '& .MuiInputBase-input': {
-              color: 'white',
-            },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.5)',
-              },
-              '&:hover fieldset': {
-                borderColor: 'white',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'white',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'rgba(255, 255, 255, 0.5)',
-              '&.Mui-focused': {
-                color: 'white',
-              },
-            },
-          }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          fullWidth
-          sx={{
-            mt: 2,
-            background: 'linear-gradient(90deg, #00c6ff, #0072ff)',
-            padding: '10px 20px',
-            textTransform: 'uppercase',
-            fontWeight: 'bold',
-            color: '#fff',
-            '&:hover': {
-              background: 'linear-gradient(90deg, #0072ff, #00c6ff)',
-            },
-          }}
-        >
-          Generate Flashcards
-        </Button>
-        {error && (
-          <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-            {error}
-          </Typography>
-        )}
-      </Box>
+    <AppShell
+      eyebrow="Generator"
+      title="Create polished flashcards from any study material."
+      description="Paste in notes, reading excerpts, or technical concepts and generate a clean set of cards you can review, flip through, and save."
+    >
+      <Grid container spacing={3.5}>
+        <Grid item xs={12} md={8}>
+          <Card sx={{ borderRadius: 6 }}>
+            <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography variant="h5">Source material</Typography>
+                  <Typography variant="body1" sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.8 }}>
+                    Best results come from structured notes, lecture summaries, or concise technical explanations.
+                  </Typography>
+                </Box>
 
-      {flashcards.length > 0 && (
-        <>
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ color: '#00c6ff' }}>
-              Generated Flashcards
-            </Typography>
-            <Grid container spacing={4}>
-              {flashcards.map((flashcard, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Card
-                    onClick={() => handleCardClick(index)}
-                    sx={{
-                      backgroundColor: '#2C2C2C',
-                      color: '#00c6ff',
-                      boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.5)',
-                      transition: 'transform 0.3s ease-in-out',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                    }}
-                  >
-                    <CardContent
-                      sx={{
-                        minHeight: '200px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
+                <TextField
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  label="Paste your text"
+                  placeholder="Example: Explain how binary search reduces the search space by checking the midpoint of a sorted array..."
+                  fullWidth
+                  multiline
+                  rows={12}
+                />
+
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between">
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Keep the source focused and well-structured for clearer prompts and answers.
+                  </Typography>
+                  <Button variant="contained" onClick={handleSubmit} disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Generate flashcards'}
+                  </Button>
+                </Stack>
+
+                {error ? (
+                  <Box sx={{ px: 2, py: 1.5, borderRadius: 4, bgcolor: 'rgba(248, 113, 113, 0.10)', border: '1px solid rgba(248, 113, 113, 0.18)' }}>
+                    <Typography color="error" variant="body2">
+                      {error}
+                    </Typography>
+                  </Box>
+                ) : null}
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Stack spacing={3}>
+            <Card sx={{ borderRadius: 6 }}>
+              <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
+                <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.08rem' } }}>
+                  What makes a good input?
+                </Typography>
+                <Stack spacing={1.25} sx={{ mt: 2 }}>
+                  <Chip label="Clean terminology" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
+                  <Chip label="Concept-heavy notes" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
+                  <Chip label="Short paragraphs or bullets" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 6, background: 'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))' }}>
+              <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
+                <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                  Preview
+                </Typography>
+                <Typography variant="h5" sx={{ mt: 1, fontSize: { xs: '1.45rem', md: '1.75rem' }, lineHeight: 1.12 }}>
+                  {flashcards.length > 0 ? `${flashcards.length} cards generated` : 'Ready to generate'}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                  Generated cards appear below as interactive tiles. Click any card to flip between question and answer.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Grid>
+      </Grid>
+
+      {flashcards.length > 0 ? (
+        <Box sx={{ mt: { xs: 5, md: 7 } }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            sx={{ mb: 3 }}
+          >
+            <Box>
+              <Typography variant="h4">Generated flashcards</Typography>
+              <Typography variant="body1" sx={{ mt: 1, color: 'text.secondary' }}>
+                Review the generated set and save it when you are happy with the results.
+              </Typography>
+            </Box>
+            <Button variant="outlined" onClick={handleOpenDialog} sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}>
+              Save set
+            </Button>
+          </Stack>
+
+          <Grid container spacing={3}>
+            {flashcards.map((flashcard, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card
+                  onClick={() => handleCardClick(index)}
+                  sx={{
+                    height: 252,
+                    cursor: 'pointer',
+                    borderRadius: 6,
+                    transition: 'transform 0.25s ease, border-color 0.25s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      borderColor: 'rgba(142, 168, 255, 0.3)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ height: '100%', p: 0 }}>
+                    <Box sx={{ perspective: '1000px', position: 'relative', width: '100%', height: '100%' }}>
                       <Box
                         sx={{
-                          perspective: '1000px',
-                          position: 'relative',
+                          transition: 'transform 0.6s',
+                          transformStyle: 'preserve-3d',
+                          position: 'absolute',
                           width: '100%',
                           height: '100%',
+                          transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0deg)',
                         }}
                       >
                         <Box
                           sx={{
-                            transition: 'transform 0.6s',
-                            transformStyle: 'preserve-3d',
                             position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                            inset: 0,
+                            backfaceVisibility: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            p: 2.25,
                           }}
                         >
-                          {/* Front Side */}
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              width: '100%',
-                              height: '100%',
-                              backfaceVisibility: 'hidden',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              padding: 2,
-                              boxSizing: 'border-box',
-                            }}
+                          <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                            Prompt
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="center"
+                            sx={{ fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
                           >
-                            <Typography variant="h6" component="div" align="center">
-                              {flashcard.front}
-                            </Typography>
-                          </Box>
-                          {/* Back Side */}
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              width: '100%',
-                              height: '100%',
-                              backfaceVisibility: 'hidden',
-                              transform: 'rotateY(180deg)',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              padding: 2,
-                              boxSizing: 'border-box',
-                            }}
+                            {flashcard.front}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.74rem' }}>
+                            Click to flip
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            p: 2.25,
+                            background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
+                          }}
+                        >
+                          <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                            Answer
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            align="center"
+                            sx={{ fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
                           >
-                            <Typography variant="h6" component="div" align="center">
-                              {flashcard.back}
-                            </Typography>
-                          </Box>
+                            {flashcard.back}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.74rem' }}>
+                            Click to flip back
+                          </Typography>
                         </Box>
                       </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenDialog}
-              sx={{
-                background: 'linear-gradient(90deg, #00c6ff, #0072ff)',
-                padding: '10px 20px',
-                textTransform: 'uppercase',
-                fontWeight: 'bold',
-                color: '#fff',
-                borderRadius: '30px',
-                '&:hover': {
-                  background: 'linear-gradient(90deg, #0072ff, #00c6ff)',
-                },
-              }}
-            >
-              Save Flashcards
-            </Button>
-          </Box>
-        </>
-      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      ) : null}
 
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Save Flashcard Set</DialogTitle>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: 6,
+            border: '1px solid rgba(148, 163, 184, 0.14)',
+            background: 'rgba(11, 16, 32, 0.94)',
+            minWidth: { xs: 'auto', sm: 480 },
+          },
+        }}
+      >
+        <DialogTitle>Save flashcard set</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Please enter a name for your flashcard set.
+          <DialogContentText sx={{ color: 'text.secondary', mb: 2 }}>
+            Give this set a clear name so it is easy to find later.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Set Name"
+            label="Set name"
             type="text"
             fullWidth
             value={setName}
             onChange={(e) => setSetName(e.target.value)}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={saveFlashcards} color="primary">
-            Save
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={handleCloseDialog} color="inherit" sx={{ color: 'text.secondary' }}>
+            Cancel
+          </Button>
+          <Button onClick={saveFlashcards} variant="contained" disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save set'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </AppShell>
   );
 }

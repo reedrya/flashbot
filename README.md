@@ -1,52 +1,98 @@
 # AI Flashcard Generator
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+AI flashcard app built with Next.js, Firebase, Material UI, Clerk, Groq, and Stripe.
 
-## Technologies Used:
-### Next.js, Firebase, Material UI, Clerk, Groq
+## Stack
 
-## Getting Started
+- `Next.js`
+- `Firebase / Firestore`
+- `Clerk` for auth
+- `Groq` for flashcard generation
+- `Stripe` for checkout
+- `Material UI`
 
-First, install the necessary dependancies:
+## Prerequisites
+
+- `Node.js 18.17+`
+- `npm`
+- A `Clerk` account
+- A `Groq` API key
+- A `Stripe` account if you want checkout to work
+
+## Install
 
 ```bash
-npm i firebase
-npm i @mui/material @emotion/react @emotion/styled
-npm i @clerk/nextjs
-npm i @stripe/stripe-js
-npm i @auth0/nextjs-auth0
-npm i --save groq
+npm install
 ```
 
-Finally, run the development server:
+## Environment Setup
+
+Create a local env file:
+
+```bash
+cp .env.local.example .env.local
+```
+
+If you are on Windows PowerShell, you can use:
+
+```powershell
+Copy-Item .env.local.example .env.local
+```
+
+Then update `\.env.local` with your real keys:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key
+CLERK_SECRET_KEY=sk_test_your_secret_key
+GROQ_API_KEY=gsk_your_groq_api_key
+GROQ_MODEL=llama-3.1-8b-instant
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_your_stripe_publishable_key
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+```
+
+## Where To Get Keys
+
+- `Clerk`: create an application in the [Clerk Dashboard](https://dashboard.clerk.com/) and copy the publishable key and secret key from API Keys.
+- `Groq`: create an API key in the [Groq Console](https://console.groq.com/keys).
+- `Stripe`: copy the publishable key and secret key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
+
+## What Each Key Enables
+
+- `GROQ_API_KEY`: required for the `Generate Flashcards` button.
+- `GROQ_MODEL`: optional. Defaults to `llama-3.1-8b-instant`.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`: required for Clerk sign-in and sign-up.
+- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` and `STRIPE_SECRET_KEY`: required for the pricing checkout flow.
+
+If Clerk keys are missing, the app will still load, but auth pages will show a setup message instead of the Clerk UI.
+
+## Firebase
+
+Firebase is currently configured directly in `firebase.js`. No extra local env setup is required for Firebase in the current version of this project.
+
+## Run Locally
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+If you add or change environment variables, restart the dev server.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Common Setup Issues
 
-## Learn More
+- `Missing publishableKey`: your Clerk keys are missing or invalid.
+- `The GROQ_API_KEY environment variable is missing or empty`: add `GROQ_API_KEY` to `\.env.local` and restart the server.
+- Stripe checkout errors: confirm both Stripe keys are set and your price IDs are valid.
+- Node version warnings: upgrade to Node `18.17+` if you are on an older version.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```

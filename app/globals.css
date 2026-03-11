@@ -4,7 +4,22 @@
   margin: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: #24201c;
-  color: #dbdbdb;
+  min-height: 100vh;
+  color: #f4f7fb;
+  background-color: #0b1020;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(142, 168, 255, 0.32);
+  color: #f8fbff;
 }

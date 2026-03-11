@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
+const defaultGroqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+
 const systemPrompt = `
 You are a flashcard creator. Your task is to generate concise and effective flashcards based on the given topic or content. Please follow these guidelines:
 
@@ -28,29 +30,38 @@ Return in the following JSON format:
 `;
 
 export async function POST(req) {
-    const groq = new Groq();
-    const data = await req.text();
-
-    console.log('Received text:', data);
-
     try {
+        if (!process.env.GROQ_API_KEY) {
+            return NextResponse.json(
+                { error: 'Missing GROQ_API_KEY. Add it to your .env.local file and restart the dev server.' },
+                { status: 500 }
+            );
+        }
+
+        const { text } = await req.json();
+
+        if (!text || !text.trim()) {
+            return NextResponse.json(
+                { error: 'Please provide text to generate flashcards.' },
+                { status: 400 }
+            );
+        }
+
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
         const completion = await groq.chat.completions.create({
             messages: [
                 { role: 'system', content: systemPrompt },
-                { role: 'user', content: data },
+                { role: 'user', content: text },
             ],
-            model: 'llama3-8b-8192',
+            model: defaultGroqModel,
             response_format: { type: 'json_object' }, 
         });
-
-        console.log('Completion response:', completion);
 
         const content = completion.choices[0].message.content;
 
         let flashcards;
         try {
             flashcards = JSON.parse(content);
-            console.log('Parsed flashcards:', flashcards);
         } catch (parseError) {
             console.error('Failed to parse JSON response:', parseError);
             throw new Error('Failed to parse JSON response');
@@ -63,6 +74,9 @@ export async function POST(req) {
         return NextResponse.json(flashcards);
     } catch (error) {
         console.error('Error generating flashcards:', error);
-        return NextResponse.json({ error: 'An error occurred while generating flashcards. Please try again.' }, { status: 500 });
+        return NextResponse.json(
+            { error: error.message || 'An error occurred while generating flashcards. Please try again.' },
+            { status: 500 }
+        );
     }
 }

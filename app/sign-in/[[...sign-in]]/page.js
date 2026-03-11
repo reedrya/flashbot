@@ -1,56 +1,33 @@
-import React from 'react';
-import { Container, Box, Typography, AppBar, Toolbar, Button } from '@mui/material';
+import { Box, Card, CardContent, Typography } from '@mui/material';
 import { SignIn } from '@clerk/nextjs';
-import Link from 'next/link';
+import AppShell from '@/components/AppShell';
+import clerkAppearance from '@/components/clerkAppearance';
+
+const isClerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function SignInPage() {
   return (
-    <Container>
-      <AppBar
-        position="static"
-        sx={{
-          backgroundColor: '#2C2C2C',
-          boxShadow: '0 4px 15px rgba(0, 114, 255, 0.4)',
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, color: '#00c6ff', fontWeight: 'bold' }}>
-            FlashBot
-          </Typography>
-          <Button color="inherit" sx={{ color: '#fff' }}>
-            <Link href="/sign-in" passHref>
-              Login
-            </Link>
-          </Button>
-          <Button color="inherit" sx={{ color: '#fff' }}>
-            <Link href="/sign-up" passHref>
-              Sign Up
-            </Link>
-          </Button>
-        </Toolbar>
-      </AppBar>
-
-      <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        sx={{
-          textAlign: 'center',
-          my: 4,
-          color: '#fff',
-        }}
-      >
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          sx={{ textShadow: '0px 0px 10px rgba(255,255,255,0.8)' }}
-        >
-          Sign In
-        </Typography>
-        <SignIn />
+    <AppShell
+      eyebrow="Authentication"
+      title="Welcome back."
+      description="Sign in to generate new flashcards, manage your saved sets, and continue your study sessions."
+      maxWidth="md"
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        {isClerkConfigured ? (
+          <SignIn appearance={clerkAppearance} />
+        ) : (
+          <Card sx={{ width: '100%', maxWidth: 560, borderRadius: 6 }}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h5">Clerk is not configured yet.</Typography>
+              <Typography sx={{ mt: 2, color: 'text.secondary', lineHeight: 1.8 }}>
+                Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to your `.env.local`
+                file, then restart the development server.
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
       </Box>
-    </Container>
+    </AppShell>
   );
 }
