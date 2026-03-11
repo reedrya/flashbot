@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -31,9 +32,44 @@ export default function GenerateClient() {
   const [flipped, setFlipped] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [billing, setBilling] = useState(null);
+  const [billingError, setBillingError] = useState('');
+  const [upgradePrompt, setUpgradePrompt] = useState('');
+
+  useEffect(() => {
+    async function loadBilling() {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!user) {
+        setBilling(null);
+        return;
+      }
+
+      try {
+        setBillingError('');
+        const response = await fetch('/api/billing');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load billing details.');
+        }
+
+        setBilling(data.billing);
+      } catch (loadError) {
+        console.error('Error loading billing:', loadError);
+        setBillingError(loadError.message || 'Failed to load billing details.');
+      }
+    }
+
+    loadBilling();
+  }, [isLoaded, user]);
 
   const handleSubmit = async () => {
     setError(null);
+    setUpgradePrompt('');
+
     if (isLoaded && !user) {
       setError('Please sign in to generate flashcards.');
       return;
@@ -42,7 +78,6 @@ export default function GenerateClient() {
     if (!text.trim()) {
       setError('Please enter some text to generate flashcards.');
       return;
-
     }
 
     try {
@@ -58,14 +93,24 @@ export default function GenerateClient() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.billing) {
+          setBilling(data.billing);
+        }
+        if (data.code === 'plan_limit_exceeded') {
+          setUpgradePrompt(data.resource || 'generations');
+        }
         throw new Error(data.error || 'Failed to generate flashcards');
       }
 
       setFlashcards(data.flashcards || []);
       setFlipped(new Array(data.flashcards.length).fill(false));
-    } catch (error) {
-      console.error('Error generating flashcards:', error);
-      setError(error.message || 'An error occurred while generating flashcards. Please try again.');
+      setBilling(data.billing || null);
+    } catch (submitError) {
+      console.error('Error generating flashcards:', submitError);
+      setError(
+        submitError.message ||
+          'An error occurred while generating flashcards. Please try again.',
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -91,6 +136,8 @@ export default function GenerateClient() {
 
   const saveFlashcards = async () => {
     setSaveError(null);
+    setUpgradePrompt('');
+
     if (isLoaded && !user) {
       setSaveError('Please sign in to save flashcards.');
       return;
@@ -116,15 +163,25 @@ export default function GenerateClient() {
 
       const data = await response.json();
       if (!response.ok) {
+        if (data.billing) {
+          setBilling(data.billing);
+        }
+        if (data.code === 'plan_limit_exceeded') {
+          setUpgradePrompt(data.resource || 'saved_sets');
+        }
         throw new Error(data.error || 'Failed to save flashcards');
       }
 
+      setBilling(data.billing || null);
       alert('Flashcards saved successfully!');
       handleCloseDialog();
       setSetName('');
-    } catch (error) {
-      console.error('Error saving flashcards:', error);
-      setSaveError(error.message || 'An error occurred while saving flashcards. Please try again.');
+    } catch (submitError) {
+      console.error('Error saving flashcards:', submitError);
+      setSaveError(
+        submitError.message ||
+          'An error occurred while saving flashcards. Please try again.',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -143,8 +200,12 @@ export default function GenerateClient() {
               <Stack spacing={2.5}>
                 <Box>
                   <Typography variant="h5">Source material</Typography>
-                  <Typography variant="body1" sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.8 }}>
-                    Best results come from structured notes, lecture summaries, or concise technical explanations.
+                  <Typography
+                    variant="body1"
+                    sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.8 }}
+                  >
+                    Best results come from structured notes, lecture summaries, or concise
+                    technical explanations.
                   </Typography>
                 </Box>
 
@@ -169,11 +230,33 @@ export default function GenerateClient() {
                 </Button>
 
                 {error ? (
-                  <Box sx={{ px: 5, py: 1.5, borderRadius: 4, bgcolor: 'rgba(248, 113, 113, 0.10)', border: '1px solid rgba(248, 113, 113, 0.18)' }}>
+                  <Box
+                    sx={{
+                      px: 5,
+                      py: 1.5,
+                      borderRadius: 4,
+                      bgcolor: 'rgba(248, 113, 113, 0.10)',
+                      border: '1px solid rgba(248, 113, 113, 0.18)',
+                    }}
+                  >
                     <Typography color="error" variant="body2">
                       {error}
                     </Typography>
                   </Box>
+                ) : null}
+
+                {upgradePrompt ? (
+                  <Alert
+                    severity="info"
+                    action={
+                      <Button href="/billing" color="inherit" size="small">
+                        Upgrade
+                      </Button>
+                    }
+                  >
+                    Upgrade your plan to raise your{' '}
+                    {upgradePrompt === 'saved_sets' ? 'saved set' : 'generation'} limit.
+                  </Alert>
                 ) : null}
               </Stack>
             </CardContent>
@@ -188,26 +271,110 @@ export default function GenerateClient() {
                   What makes a good input?
                 </Typography>
                 <Stack spacing={1.25} sx={{ mt: 2 }}>
-                  <Chip label="Clean terminology" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
-                  <Chip label="Concept-heavy notes" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
-                  <Chip label="Short paragraphs or bullets" sx={{ justifyContent: 'flex-start', height: 30, fontSize: '0.74rem', bgcolor: 'rgba(142, 168, 255, 0.12)', color: 'primary.main' }} />
+                  <Chip
+                    label="Clean terminology"
+                    sx={{
+                      justifyContent: 'flex-start',
+                      height: 30,
+                      fontSize: '0.74rem',
+                      bgcolor: 'rgba(142, 168, 255, 0.12)',
+                      color: 'primary.main',
+                    }}
+                  />
+                  <Chip
+                    label="Concept-heavy notes"
+                    sx={{
+                      justifyContent: 'flex-start',
+                      height: 30,
+                      fontSize: '0.74rem',
+                      bgcolor: 'rgba(142, 168, 255, 0.12)',
+                      color: 'primary.main',
+                    }}
+                  />
+                  <Chip
+                    label="Short paragraphs or bullets"
+                    sx={{
+                      justifyContent: 'flex-start',
+                      height: 30,
+                      fontSize: '0.74rem',
+                      bgcolor: 'rgba(142, 168, 255, 0.12)',
+                      color: 'primary.main',
+                    }}
+                  />
                 </Stack>
               </CardContent>
             </Card>
 
-            <Card sx={{ py: 1, px: 5, borderRadius: 6, background: 'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))' }}>
+            <Card
+              sx={{
+                py: 1,
+                px: 5,
+                borderRadius: 6,
+                background:
+                  'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))',
+              }}
+            >
               <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
-                <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                <Typography
+                  variant="overline"
+                  sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}
+                >
                   Preview
                 </Typography>
-                <Typography variant="h5" sx={{ mt: 1, fontSize: { xs: '1.45rem', md: '1.75rem' }, lineHeight: 1.12 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ mt: 1, fontSize: { xs: '1.45rem', md: '1.75rem' }, lineHeight: 1.12 }}
+                >
                   {flashcards.length > 0 ? `${flashcards.length} cards generated` : 'Ready to generate'}
                 </Typography>
-                <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}>
-                  Generated cards appear below as interactive tiles. Click any card to flip between question and answer.
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}
+                >
+                  Generated cards appear below as interactive tiles. Click any card to flip between
+                  question and answer.
                 </Typography>
               </CardContent>
             </Card>
+
+            {isLoaded && user && billing ? (
+              <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
+                <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
+                  <Typography
+                    variant="overline"
+                    sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}
+                  >
+                    Plan usage
+                  </Typography>
+                  <Typography variant="h6" sx={{ mt: 1 }}>
+                    {billing.planName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.7 }}
+                  >
+                    {billing.usage.generationsUsed} of {billing.usage.generationsLimit} monthly
+                    generations used
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ mt: 0.5, color: 'text.secondary', lineHeight: 1.7 }}
+                  >
+                    {billing.usage.savedSetsUsed ?? 0} of {billing.usage.savedSetsLimit ?? 'unlimited'} saved
+                    sets used
+                  </Typography>
+                  <Button
+                    href="/billing"
+                    variant="outlined"
+                    sx={{ mt: 2, borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
+                  >
+                    Manage billing
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {billingError ? <Alert severity="warning">{billingError}</Alert> : null}
           </Stack>
         </Grid>
       </Grid>
@@ -227,7 +394,11 @@ export default function GenerateClient() {
                 Review the generated set and save it when you are happy with the results.
               </Typography>
             </Box>
-            <Button variant="outlined" onClick={handleOpenDialog} sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}>
+            <Button
+              variant="outlined"
+              onClick={handleOpenDialog}
+              sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
+            >
               Save set
             </Button>
           </Stack>
@@ -249,7 +420,14 @@ export default function GenerateClient() {
                   }}
                 >
                   <CardContent sx={{ height: '100%', p: 0 }}>
-                    <Box sx={{ perspective: '1000px', position: 'relative', width: '100%', height: '100%' }}>
+                    <Box
+                      sx={{
+                        perspective: '1000px',
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                      }}
+                    >
                       <Box
                         sx={{
                           transition: 'transform 0.6s',
@@ -271,17 +449,36 @@ export default function GenerateClient() {
                             p: 2.25,
                           }}
                         >
-                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                          <Typography
+                            variant="overline"
+                            sx={{
+                              px: 7,
+                              pt: 1,
+                              color: 'primary.main',
+                              fontWeight: 700,
+                              letterSpacing: '0.12em',
+                              fontSize: '0.66rem',
+                            }}
+                          >
                             Prompt
                           </Typography>
                           <Typography
                             variant="body1"
                             align="center"
-                            sx={{ px: 4, fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
+                            sx={{
+                              px: 4,
+                              fontSize: { xs: '0.98rem', md: '1.05rem' },
+                              fontWeight: 600,
+                              lineHeight: 1.4,
+                              overflowWrap: 'anywhere',
+                            }}
                           >
                             {flashcard.front}
                           </Typography>
-                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}
+                          >
                             Click to flip
                           </Typography>
                         </Box>
@@ -296,20 +493,39 @@ export default function GenerateClient() {
                             flexDirection: 'column',
                             justifyContent: 'space-between',
                             p: 2.25,
-                            background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
+                            background:
+                              'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
                           }}
                         >
-                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em', fontSize: '0.66rem' }}>
+                          <Typography
+                            variant="overline"
+                            sx={{
+                              px: 7,
+                              pt: 1,
+                              color: 'secondary.main',
+                              fontWeight: 700,
+                              letterSpacing: '0.12em',
+                              fontSize: '0.66rem',
+                            }}
+                          >
                             Answer
                           </Typography>
                           <Typography
                             variant="body2"
                             align="center"
-                            sx={{ px: 4, fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
+                            sx={{
+                              px: 4,
+                              fontSize: '0.86rem',
+                              lineHeight: 1.55,
+                              overflowWrap: 'anywhere',
+                            }}
                           >
                             {flashcard.back}
                           </Typography>
-                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}
+                          >
                             Click to flip back
                           </Typography>
                         </Box>

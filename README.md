@@ -1,6 +1,6 @@
 # FlashBot
 
-FlashBot is a Next.js study app that turns raw notes into flashcards, lets signed-in users save named sets, and includes a Stripe-powered pricing flow.
+FlashBot is a Next.js-powered study app that transforms raw notes into flashcards, allows signed-in users to save named sets, and offers Stripe-powered recurring subscription plans with different usage limits.
 
 ## Current Features
 
@@ -30,6 +30,7 @@ FlashBot is a Next.js study app that turns raw notes into flashcards, lets signe
 - `/flashcards`: saved flashcard set library
 - `/flashcard?id=<setId>`: review a single saved set
 - `/sign-in` and `/sign-up`: authentication pages
+- `/billing`: plan details, usage, and Stripe billing portal access
 - `/result`: checkout result screen
 
 ## API Routes
@@ -40,7 +41,11 @@ FlashBot is a Next.js study app that turns raw notes into flashcards, lets signe
 - `GET /api/flashcard-sets/[setId]`: load a saved set
 - `PATCH /api/flashcard-sets/[setId]`: rename a saved set
 - `DELETE /api/flashcard-sets/[setId]`: delete a saved set
+- `GET /api/billing`: load the current user's billing summary
+- `POST /api/billing_portal`: open the Stripe Billing Portal
 - `POST /api/checkout_sessions`: create a Stripe Checkout session
+- `GET /api/checkout_sessions`: load a Stripe Checkout session result
+- `POST /api/stripe/webhook`: receive Stripe subscription webhooks
 
 ## Prerequisites
 
@@ -99,6 +104,10 @@ GROQ_MODEL=llama-3.1-8b-instant
 # Stripe
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_your_stripe_publishable_key
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
+STRIPE_BASIC_PRICE_ID=price_your_basic_monthly_price_id
+STRIPE_PRO_PRICE_ID=price_your_pro_monthly_price_id
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ## What Each Environment Variable Does
@@ -108,7 +117,10 @@ STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 - `FIREBASE_ADMIN_*`: power authenticated server-side Firestore reads and writes
 - `GROQ_API_KEY`: required for flashcard generation
 - `GROQ_MODEL`: optional, defaults to `llama-3.1-8b-instant`
-- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` and `STRIPE_SECRET_KEY`: required for Stripe checkout
+- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` and `STRIPE_SECRET_KEY`: required for Stripe checkout and customer portal sessions
+- `STRIPE_WEBHOOK_SECRET`: verifies incoming Stripe webhook events
+- `STRIPE_BASIC_PRICE_ID` and `STRIPE_PRO_PRICE_ID`: map your Stripe products to the app's paid plans
+- `NEXT_PUBLIC_APP_URL`: used for Stripe success, cancel, and portal return URLs
 
 If Clerk is not configured, the app still renders, but the sign-in and sign-up pages show a setup message instead of the Clerk widgets.
 
@@ -139,7 +151,20 @@ The API routes sanitize saved flashcards, store `createdAt` and `updatedAt` time
 
 ## Stripe Notes
 
-Two sample subscription price IDs are currently hardcoded in `app/page.js`.
+Stripe billing now uses a hybrid plan model:
+
+- `Free`: 10 generations/month and 3 saved sets
+- `Basic`: 100 generations/month and 25 saved sets
+- `Pro`: 500 generations/month and unlimited saved sets
+
+Billing state is stored in Firestore on `users/{clerkUserId}` and synced from Stripe webhooks. The generator and saved-set APIs enforce limits on the server.
+
+To test locally:
+
+1. Create products `Basic` and `Pro` recurring prices in Stripe.
+2. Copy those price ids into `STRIPE_BASIC_PRICE_ID` and `STRIPE_PRO_PRICE_ID`.
+3. Run a webhook forwarder such as `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+4. Copy the returned signing secret into `STRIPE_WEBHOOK_SECRET`.
 
 ## Run Locally
 
@@ -153,15 +178,6 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 If you add or change environment variables, restart the dev server.
 
-## Typical User Flow
-
-1. Sign in with Clerk.
-2. Open `/generate` and paste study material.
-3. Generate a flashcard set with Groq.
-4. Save the generated cards with a unique set name.
-5. Review sets later from `/flashcards`.
-6. Open a set and click cards to flip between front and back.
-
 ## Common Setup Issues
 
 - `Missing publishableKey`: Clerk keys are missing or invalid
@@ -169,7 +185,8 @@ If you add or change environment variables, restart the dev server.
 - `Missing Firebase Admin credentials`: add `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and `FIREBASE_ADMIN_PRIVATE_KEY` to `.env.local`
 - `Missing GROQ_API_KEY`: add `GROQ_API_KEY` and restart the server
 - Duplicate save or rename errors: set names must be unique per user
-- Stripe checkout errors: confirm both Stripe keys are set and replace the hardcoded price IDs with valid ones from your Stripe account
+- Stripe checkout errors: confirm all Stripe keys and plan price ids are set, then restart the dev server
+- Subscription status not updating: verify your Stripe webhook forwarder is running and `STRIPE_WEBHOOK_SECRET` matches
 - Node version warnings: upgrade to Node `18.17+`
 
 ## Scripts

@@ -1,6 +1,11 @@
 import { auth } from '@clerk/nextjs/server';
 import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
+import {
+  createPlanLimitPayload,
+  getUserBillingSummary,
+  incrementGenerationUsage,
+} from '@/lib/billing';
 
 const defaultGroqModel = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
@@ -53,6 +58,19 @@ export async function POST(req) {
       );
     }
 
+    const billing = await getUserBillingSummary(userId);
+
+    if (billing.usage.generationsRemaining !== null && billing.usage.generationsRemaining <= 0) {
+      return NextResponse.json(
+        createPlanLimitPayload(
+          `You have used all ${billing.usage.generationsLimit} generations included in the ${billing.planName} plan this month.`,
+          billing,
+          'generations',
+        ),
+        { status: 403 },
+      );
+    }
+
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const completion = await groq.chat.completions.create({
       messages: [
@@ -77,7 +95,13 @@ export async function POST(req) {
       throw new Error('Invalid response format');
     }
 
-    return NextResponse.json(flashcards);
+    await incrementGenerationUsage(userId);
+    const updatedBilling = await getUserBillingSummary(userId);
+
+    return NextResponse.json({
+      ...flashcards,
+      billing: updatedBilling,
+    });
   } catch (error) {
     console.error('Error generating flashcards:', error);
     return NextResponse.json(

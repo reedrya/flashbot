@@ -1,10 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
-
-function getFlashcardSetsCollection(userId) {
-  return adminDb.collection('users').doc(userId).collection('flashcardSets');
-}
+import {
+  createPlanLimitPayload,
+  getFlashcardSetsCollection,
+  getUserBillingSummary,
+} from '@/lib/billing';
 
 function sanitizeFlashcards(flashcards) {
   if (!Array.isArray(flashcards)) {
@@ -80,6 +80,19 @@ export async function POST(req) {
     }
 
     const existingSnapshot = await getFlashcardSetsCollection(userId).get();
+    const billing = await getUserBillingSummary(userId, { includeSavedSetCount: true });
+
+    if (billing.usage.savedSetsRemaining !== null && billing.usage.savedSetsRemaining <= 0) {
+      return NextResponse.json(
+        createPlanLimitPayload(
+          `You have reached the ${billing.planName} plan limit of ${billing.usage.savedSetsLimit} saved sets.`,
+          billing,
+          'saved_sets',
+        ),
+        { status: 403 },
+      );
+    }
+
     const hasDuplicateName = existingSnapshot.docs.some((doc) => {
       const data = doc.data();
       const existingName = typeof data.name === 'string' ? data.name : '';
@@ -110,11 +123,14 @@ export async function POST(req) {
       updatedAt: now,
     });
 
+    const updatedBilling = await getUserBillingSummary(userId, { includeSavedSetCount: true });
+
     return NextResponse.json({
       id: flashcardSetRef.id,
       name: trimmedName,
       cardCount: sanitizedFlashcards.length,
       updatedAt: now,
+      billing: updatedBilling,
     });
   } catch (error) {
     console.error('Error saving flashcard set:', error);

@@ -8,13 +8,18 @@ const ResultPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const session_id = searchParams.get('session_id');
+  const canceled = searchParams.get('canceled') === '1';
+  const requestedPlanId = searchParams.get('planId');
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCheckoutSession = async () => {
-      if (!session_id) return;
+      if (!session_id) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch(`/api/checkout_sessions?session_id=${session_id}`);
         const sessionData = await res.json();
@@ -31,6 +36,18 @@ const ResultPage = () => {
     };
     fetchCheckoutSession();
   }, [session_id]);
+
+  const isSuccessful = session?.status === 'complete';
+  const title = canceled
+    ? 'Checkout was canceled.'
+    : isSuccessful
+      ? 'Subscription confirmed.'
+      : 'We could not confirm this checkout.';
+  const description = canceled
+    ? 'No charge was made. You can return to pricing whenever you want to upgrade.'
+    : isSuccessful
+      ? 'Your plan is now active and your billing profile has been updated.'
+      : 'The checkout result is unavailable right now. You can retry from the pricing section.';
 
   if (loading) {
     return (
@@ -64,31 +81,33 @@ const ResultPage = () => {
   return (
     <AppShell
       eyebrow="Checkout"
-      title={session?.payment_status === 'paid' ? 'Thank you for your purchase.' : 'Payment was not completed.'}
-      description={
-        session?.payment_status === 'paid'
-          ? 'Your subscription flow has finished successfully.'
-          : 'The payment did not go through, but you can try again any time.'
-      }
+      title={title}
+      description={description}
       maxWidth="sm"
     >
-      <Card sx={{ borderRadius: 6 }}>
+      <Card sx={{ py: 2, px: 1, borderRadius: 6 }}>
         <CardContent sx={{ p: 5 }}>
-          {session?.payment_status === 'paid' ? (
+          {isSuccessful ? (
             <Stack spacing={2}>
-              <Typography variant="h6">Session ID</Typography>
+              <Typography variant="h6">Plan activated</Typography>
               <Box sx={{ p: 2, borderRadius: 4, bgcolor: 'rgba(142, 168, 255, 0.08)', border: '1px solid rgba(142, 168, 255, 0.12)' }}>
-                <Typography variant="body2" sx={{ wordBreak: 'break-all', color: 'text.secondary' }}>
-                  {session_id}
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {session?.planId ? `${session.planId.charAt(0).toUpperCase()}${session.planId.slice(1)}` : 'Paid plan'}
                 </Typography>
               </Box>
               <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
-                We have received your payment. You should receive confirmation details shortly.
+                Thank you for your subscription! You can now start using the app with the {session?.planId ? `${session.planId.charAt(0).toUpperCase()}${session.planId.slice(1)}` : 'Paid plan'} plan.
               </Typography>
             </Stack>
+          ) : canceled ? (
+            <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+              {requestedPlanId
+                ? `Your ${requestedPlanId} checkout was canceled before completion.`
+                : 'Your checkout was canceled before completion.'}
+            </Typography>
           ) : (
             <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
-              Your payment was not successful. Please try again from the pricing section when you are ready.
+              Please try again from the pricing section or reopen your billing page if the subscription already processed on Stripe.
             </Typography>
           )}
 
@@ -96,13 +115,23 @@ const ResultPage = () => {
             <Button variant="contained" onClick={() => router.push('/')}>
               Return home
             </Button>
-            <Button
-              variant="outlined"
-              onClick={() => router.push('/generate')}
-              sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-            >
-              Open generator
-            </Button>
+            {isSuccessful ? (
+              <Button
+                variant="outlined"
+                onClick={() => router.push('/billing')}
+                sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
+              >
+                Open billing
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                onClick={() => router.push('/generate')}
+                sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
+              >
+                Open generator
+              </Button>
+            )}
           </Stack>
         </CardContent>
       </Card>

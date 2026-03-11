@@ -25,7 +25,16 @@ export default function AppShell({
     <Box sx={{ minHeight: '100vh' }}>
       <AppBar position="sticky">
         <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ minHeight: 76, gap: 2 }}>
+          <Toolbar
+            disableGutters
+            sx={{
+              minHeight: { xs: 72, md: 76 },
+              gap: 2,
+              py: { xs: 1, md: 0 },
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              alignItems: 'center',
+            }}
+          >
             <Typography
               component={Link}
               href="/"
@@ -66,7 +75,11 @@ export default function AppShell({
             {isClerkConfigured ? (
               <>
                 <SignedOut>
-                  <Stack direction="row" spacing={1.25}>
+                  <Stack
+                    direction="row"
+                    spacing={1.25}
+                    sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' }, justifyContent: 'flex-end' }}
+                  >
                     <Button component={Link} href="/sign-in" color="inherit" sx={{ color: 'text.secondary' }}>
                       Sign in
                     </Button>
@@ -76,14 +89,18 @@ export default function AppShell({
                   </Stack>
                 </SignedOut>
                 <SignedIn>
-                  <Stack direction="row" spacing={1.25} alignItems="center">
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    sx={{ flexWrap: 'nowrap', justifyContent: 'flex-end', flexShrink: 0 }}
+                  >
                     <Button
                       component={Link}
                       href="/flashcards"
                       color="inherit"
                       variant={pathname === '/flashcards' || pathname === '/flashcard' ? 'contained' : 'text'}
                       sx={{
-                        px: 4,
                         whiteSpace: 'nowrap',
                         color:
                           pathname === '/flashcards' || pathname === '/flashcard'
@@ -103,12 +120,38 @@ export default function AppShell({
                     >
                       My Sets
                     </Button>
-                    <UserButton />
+                    <Button
+                      component={Link}
+                      href="/billing"
+                      color="inherit"
+                      variant={pathname === '/billing' ? 'contained' : 'text'}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        display: { xs: 'none', sm: 'inline-flex' },
+                        color: pathname === '/billing' ? '#08111f' : 'text.secondary',
+                        bgcolor: pathname === '/billing' ? 'primary.main' : 'transparent',
+                        '&:hover': {
+                          bgcolor:
+                            pathname === '/billing'
+                              ? 'primary.main'
+                              : 'rgba(148, 163, 184, 0.08)',
+                        },
+                      }}
+                    >
+                      Billing
+                    </Button>
+                    <Box sx={{ px: 2, display: 'flex', flexShrink: 0 }}>
+                      <UserButton />
+                    </Box>
                   </Stack>
                 </SignedIn>
               </>
             ) : (
-              <Stack direction="row" spacing={1.25}>
+              <Stack
+                direction="row"
+                spacing={1.25}
+                sx={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}
+              >
                 <Button component={Link} href="/sign-in" color="inherit" sx={{ color: 'text.secondary' }}>
                   Sign in
                 </Button>

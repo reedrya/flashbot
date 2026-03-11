@@ -1,18 +1,54 @@
 'use client';
+import { useEffect, useMemo, useState } from 'react';
 import { Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } from '@mui/material';
+import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import getStripe from '@/utils/get-stripe';
+import { getPublicPlanCatalog, isUnlimitedLimit } from '@/lib/plans';
 
 export default function Home() {
-  const handleCheckout = async (priceId) => {
+  const { user, isLoaded } = useUser();
+  const [billing, setBilling] = useState(null);
+  const [checkoutPlanId, setCheckoutPlanId] = useState('');
+  const pricingPlans = useMemo(() => getPublicPlanCatalog(), []);
+
+  useEffect(() => {
+    async function loadBilling() {
+      if (!isLoaded || !user) {
+        setBilling(null);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/billing');
+        const data = await response.json();
+
+        if (response.ok) {
+          setBilling(data.billing);
+        }
+      } catch (error) {
+        console.error('Failed to load billing summary:', error);
+      }
+    }
+
+    loadBilling();
+  }, [isLoaded, user]);
+
+  const handleCheckout = async (planId) => {
+    if (isLoaded && !user) {
+      window.location.href = `/sign-in?redirect_url=${encodeURIComponent('/#pricing')}`;
+      return;
+    }
+
     const stripe = await getStripe();
     try {
+      setCheckoutPlanId(planId);
       const response = await fetch('/api/checkout_sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ planId }),
       });
 
       const session = await response.json();
@@ -32,6 +68,8 @@ export default function Home() {
     } catch (error) {
       console.error('Checkout error:', error.message);
       alert(`Error: ${error.message}`);
+    } finally {
+      setCheckoutPlanId('');
     }
   };
 
@@ -56,25 +94,31 @@ export default function Home() {
     'Save polished sets for future study sessions.',
   ];
 
-  const pricingPlans = [
-    {
-      name: 'Basic',
-      price: '$5',
-      period: '/ month',
-      description: 'Ideal for lightweight weekly study sessions and smaller sets of learning material.',
-      cta: 'Choose Basic',
-      priceId: 'price_1PqLAo2KXeNgEFae3Ug5HDSx',
-    },
-    {
-      name: 'Pro',
-      price: '$10',
-      period: '/ month',
-      description: 'Designed for larger study libraries, more frequent generation, and deeper long-term review.',
-      cta: 'Choose Pro',
-      priceId: 'price_1PqL3H2KXeNgEFaecGhil2DR',
-      featured: true,
-    },
-  ];
+  const currentPlanId = billing?.planId || 'free';
+
+  const getPlanButtonProps = (plan) => {
+    if (plan.id === 'free') {
+      return {
+        label: currentPlanId === 'free' ? 'Current plan' : 'Use free plan',
+        href: '/generate',
+        disabled: false,
+      };
+    }
+
+    if (billing?.hasPaidAccess && currentPlanId === plan.id) {
+      return {
+        label: 'Manage plan',
+        href: '/billing',
+        disabled: false,
+      };
+    }
+
+    return {
+      label: checkoutPlanId === plan.id ? 'Redirecting...' : plan.cta,
+      onClick: () => handleCheckout(plan.id),
+      disabled: checkoutPlanId === plan.id,
+    };
+  };
 
   return (
     <AppShell maxWidth="lg">
@@ -327,10 +371,19 @@ export default function Home() {
               Pricing
             </Typography>
             <Typography variant="h3">Choose the plan that fits your study routine.</Typography>
+            {billing ? (
+              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                You are currently on the {billing.planName} plan with {billing.usage.generationsRemaining ?? 'unlimited'} generations remaining this month.
+              </Typography>
+            ) : (
+              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                Start on the free tier, then upgrade when you want more monthly generations and saved-set capacity.
+              </Typography>
+            )}
           </Stack>
           <Grid container spacing={3}>
             {pricingPlans.map((plan) => (
-              <Grid item xs={12} md={6} key={plan.name}>
+              <Grid item xs={12} md={4} key={plan.name}>
                 <Card
                   sx={{
                     px: 3,
@@ -343,24 +396,43 @@ export default function Home() {
                   }}
                 >
                   <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
+                    {(() => {
+                      const buttonProps = getPlanButtonProps(plan);
+
+                      return (
                     <Stack spacing={1.75}>
                       <Box>
                         <Typography variant="h6" sx={{ fontSize: { xs: '1.15rem', md: '1.25rem' } }}>
                           {plan.name}
                         </Typography>
                         <Typography variant="h4" sx={{ mt: 0.5, fontSize: { xs: '1.95rem', md: '2.2rem' }, lineHeight: 1.02 }}>
-                          {plan.price}
+                          {plan.priceLabel}
                           <Typography component="span" variant="body1" sx={{ color: 'text.secondary', ml: 0.75, fontSize: '0.95rem' }}>
-                            {plan.period}
+                            {plan.priceSuffix}
                           </Typography>
                         </Typography>
                       </Box>
                       <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
                         {plan.description}
                       </Typography>
+                      <Stack spacing={0.75}>
+                        {plan.benefits.map((benefit) => (
+                          <Typography key={benefit} variant="body2" sx={{ color: 'text.secondary' }}>
+                            {benefit}
+                          </Typography>
+                        ))}
+                        <Typography variant="body2" sx={{ color: 'primary.main' }}>
+                          {isUnlimitedLimit(plan.limits.maxSavedSets)
+                            ? 'Unlimited saved sets'
+                            : `${plan.limits.maxSavedSets} saved sets max`}
+                        </Typography>
+                      </Stack>
                       <Button
                         variant={plan.featured ? 'contained' : 'outlined'}
-                        onClick={() => handleCheckout(plan.priceId)}
+                        component={buttonProps.href ? Link : 'button'}
+                        href={buttonProps.href}
+                        onClick={buttonProps.onClick}
+                        disabled={buttonProps.disabled}
                         sx={
                           plan.featured
                             ? {}
@@ -370,9 +442,11 @@ export default function Home() {
                               }
                         }
                       >
-                        {plan.cta}
+                        {buttonProps.label}
                       </Button>
                     </Stack>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </Grid>
