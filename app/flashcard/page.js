@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Container, Grid, Card, CardActionArea, CardContent, Typography, Box } from '@mui/material';
 import { doc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useUser } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 
 export default function Flashcard() {

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { doc, collection, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useUser } from '@clerk/nextjs';
 
 export default function Flashcards() {
   const { user } = useUser();
