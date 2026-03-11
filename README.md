@@ -90,9 +90,7 @@ If you add or change environment variables, restart the dev server.
 
 ## Scripts
 
-```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-```
+- `npm run dev`: Starts the Next.js development server for building and testing the flashcard app locally.
+- `npm run build`: Creates an optimized production build of the app, including the flashcard flows and integrated services.
+- `npm run start`: Runs the production build locally so you can verify the app behaves correctly outside of development mode.
+- `npm run lint`: Checks the codebase for linting issues to help keep the project consistent and catch common mistakes before shipping.
