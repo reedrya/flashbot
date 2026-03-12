@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import ScrollReveal from '@/components/ScrollReveal';
+import ThemedDialog from '@/components/ThemedDialog';
 import getStripe from '@/utils/get-stripe';
 import { getPublicPlanCatalog, isUnlimitedLimit } from '@/lib/plans';
 
@@ -14,6 +15,7 @@ export default function Home() {
   const { user, isLoaded } = useUser();
   const [billing, setBilling] = useState(null);
   const [checkoutPlanId, setCheckoutPlanId] = useState('');
+  const [checkoutError, setCheckoutError] = useState('');
   const pricingPlans = useMemo(() => getPublicPlanCatalog(), []);
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function Home() {
 
     const stripe = await getStripe();
     try {
+      setCheckoutError('');
       setCheckoutPlanId(planId);
       const response = await fetch('/api/checkout_sessions', {
         method: 'POST',
@@ -76,7 +79,7 @@ export default function Home() {
           payload?.error ||
           `Failed to start checkout (status ${response.status || 'unknown'}).`;
         console.error('Stripe session creation failed:', message);
-        alert(`Error: ${message}`);
+        setCheckoutError(message);
         return;
       }
 
@@ -85,11 +88,11 @@ export default function Home() {
 
       if (error) {
         console.error('Stripe checkout error:', error.message);
-        alert(`Error: ${error.message}`);
+        setCheckoutError(error.message);
       }
     } catch (error) {
       console.error('Checkout error:', error.message);
-      alert(`Error: ${error.message}`);
+      setCheckoutError(error.message);
     } finally {
       setCheckoutPlanId('');
     }
@@ -481,6 +484,19 @@ export default function Home() {
           </ScrollReveal>
         </Box>
       </Box>
+
+      <ThemedDialog
+        open={Boolean(checkoutError)}
+        onClose={() => setCheckoutError('')}
+        eyebrow="Pricing"
+        title="Unable to start checkout"
+        description={checkoutError}
+        actions={
+          <Button onClick={() => setCheckoutError('')} variant="contained">
+            Close
+          </Button>
+        }
+      />
     </AppShell>
   );
 }

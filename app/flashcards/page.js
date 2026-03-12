@@ -1,11 +1,25 @@
 'use client';
 
-import { Alert, Box, Button, Card, CardActionArea, CardContent, Chip, CircularProgress, Grid, Stack, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
+import ThemedDialog from '@/components/ThemedDialog';
 
 export default function Flashcards() {
   const { user, isLoaded } = useUser();
@@ -13,6 +27,11 @@ export default function Flashcards() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [activeSetId, setActiveSetId] = useState('');
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [renameError, setRenameError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -53,21 +72,43 @@ export default function Flashcards() {
     router.push(`/flashcard?id=${id}`);
   };
 
-  const handleRename = async (flashcardSet) => {
-    const nextName = window.prompt('Rename set', flashcardSet.name);
-    if (nextName === null) {
+  const openRenameDialog = (flashcardSet) => {
+    setRenameTarget(flashcardSet);
+    setRenameValue(flashcardSet.name);
+    setRenameError('');
+  };
+
+  const closeRenameDialog = () => {
+    if (renameTarget && activeSetId === renameTarget.id) {
       return;
     }
 
-    const trimmedName = nextName.trim();
-    if (!trimmedName || trimmedName === flashcardSet.name) {
+    setRenameTarget(null);
+    setRenameValue('');
+    setRenameError('');
+  };
+
+  const handleRename = async () => {
+    if (!renameTarget) {
+      return;
+    }
+
+    const trimmedName = renameValue.trim();
+    if (!trimmedName) {
+      setRenameError('Please enter a set name.');
+      return;
+    }
+
+    if (trimmedName === renameTarget.name) {
+      closeRenameDialog();
       return;
     }
 
     try {
       setError('');
-      setActiveSetId(flashcardSet.id);
-      const response = await fetch(`/api/flashcard-sets/${flashcardSet.id}`, {
+      setRenameError('');
+      setActiveSetId(renameTarget.id);
+      const response = await fetch(`/api/flashcard-sets/${renameTarget.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -82,29 +123,46 @@ export default function Flashcards() {
 
       setFlashcardSets((currentSets) =>
         currentSets.map((set) =>
-          set.id === flashcardSet.id
+          set.id === renameTarget.id
             ? { ...set, name: data.name, updatedAt: data.updatedAt || set.updatedAt }
             : set,
         ),
       );
-    } catch (renameError) {
-      console.error('Error renaming flashcard set:', renameError);
-      setError(renameError.message || 'Failed to rename flashcard set.');
+      closeRenameDialog();
+    } catch (renameRequestError) {
+      console.error('Error renaming flashcard set:', renameRequestError);
+      const message = renameRequestError.message || 'Failed to rename flashcard set.';
+      setError(message);
+      setRenameError(message);
     } finally {
       setActiveSetId('');
     }
   };
 
-  const handleDelete = async (flashcardSet) => {
-    const confirmed = window.confirm(`Delete "${flashcardSet.name}"?`);
-    if (!confirmed) {
+  const openDeleteDialog = (flashcardSet) => {
+    setDeleteTarget(flashcardSet);
+    setDeleteError('');
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteTarget && activeSetId === deleteTarget.id) {
+      return;
+    }
+
+    setDeleteTarget(null);
+    setDeleteError('');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) {
       return;
     }
 
     try {
       setError('');
-      setActiveSetId(flashcardSet.id);
-      const response = await fetch(`/api/flashcard-sets/${flashcardSet.id}`, {
+      setDeleteError('');
+      setActiveSetId(deleteTarget.id);
+      const response = await fetch(`/api/flashcard-sets/${deleteTarget.id}`, {
         method: 'DELETE',
       });
 
@@ -114,11 +172,14 @@ export default function Flashcards() {
       }
 
       setFlashcardSets((currentSets) =>
-        currentSets.filter((set) => set.id !== flashcardSet.id),
+        currentSets.filter((set) => set.id !== deleteTarget.id),
       );
-    } catch (deleteError) {
-      console.error('Error deleting flashcard set:', deleteError);
-      setError(deleteError.message || 'Failed to delete flashcard set.');
+      closeDeleteDialog();
+    } catch (deleteRequestError) {
+      console.error('Error deleting flashcard set:', deleteRequestError);
+      const message = deleteRequestError.message || 'Failed to delete flashcard set.';
+      setError(message);
+      setDeleteError(message);
     } finally {
       setActiveSetId('');
     }
@@ -131,7 +192,13 @@ export default function Flashcards() {
       description="Open a set and continue studying."
     >
       <Box sx={{ display: 'grid', gap: { xs: 4, md: 6 } }}>
-        <Stack className="reveal reveal-delay-1" direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
+        <Stack
+          className="reveal reveal-delay-1"
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1.5}
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+        >
           <Chip
             label={`${flashcardSets.length} set${flashcardSets.length === 1 ? '' : 's'}`}
             sx={{
@@ -145,7 +212,9 @@ export default function Flashcards() {
           </Button>
         </Stack>
 
-        {isLoaded && !user ? <Alert severity="info">Sign in to view your saved flashcard sets.</Alert> : null}
+        {isLoaded && !user ? (
+          <Alert severity="info">Sign in to view your saved flashcard sets.</Alert>
+        ) : null}
         {error ? <Alert severity="error">{error}</Alert> : null}
         {isLoaded && user && !isLoading && !error && flashcardSets.length === 0 ? (
           <Alert severity="info">No saved sets yet.</Alert>
@@ -189,7 +258,12 @@ export default function Flashcards() {
                     }}
                   >
                     <CardContent sx={{ px: 7.5, py: 4, width: '100%' }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        spacing={2}
+                      >
                         <Typography variant="h5" sx={{ lineHeight: 1.15, overflowWrap: 'anywhere' }}>
                           {flashcardSet.name}
                         </Typography>
@@ -199,7 +273,7 @@ export default function Flashcards() {
                             bgcolor: 'rgba(142, 168, 255, 0.12)',
                             color: 'primary.main',
                             border: '1px solid rgba(142, 168, 255, 0.18)',
-                            fontSize: '0.95em'
+                            fontSize: '0.95em',
                           }}
                         />
                       </Stack>
@@ -210,7 +284,7 @@ export default function Flashcards() {
                       size="small"
                       color="inherit"
                       disabled={activeSetId === flashcardSet.id}
-                      onClick={() => handleRename(flashcardSet)}
+                      onClick={() => openRenameDialog(flashcardSet)}
                       sx={{ color: 'text.secondary' }}
                     >
                       Rename
@@ -219,7 +293,7 @@ export default function Flashcards() {
                       size="small"
                       color="error"
                       disabled={activeSetId === flashcardSet.id}
-                      onClick={() => handleDelete(flashcardSet)}
+                      onClick={() => openDeleteDialog(flashcardSet)}
                       sx={{
                         color: 'error.main',
                         '&:hover': {
@@ -237,6 +311,122 @@ export default function Flashcards() {
           </Grid>
         ) : null}
       </Box>
+
+      <ThemedDialog
+        open={Boolean(renameTarget)}
+        onClose={closeRenameDialog}
+        eyebrow="Library"
+        title="Rename flashcard set"
+        actions={
+          <>
+            <Button
+              onClick={closeRenameDialog}
+              color="inherit"
+              disabled={activeSetId === renameTarget?.id}
+              sx={{ color: 'text.secondary' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRename}
+              variant="contained"
+              disabled={activeSetId === renameTarget?.id}
+            >
+              {activeSetId === renameTarget?.id ? 'Renaming...' : 'Save name'}
+            </Button>
+          </>
+        }
+      >
+        <TextField
+          autoFocus
+          fullWidth
+          label="Set name"
+          sx={{ mt: 1 }}
+          value={renameValue}
+          onChange={(event) => {
+            setRenameValue(event.target.value);
+            if (renameError) {
+              setRenameError('');
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              handleRename();
+            }
+          }}
+        />
+        {renameError ? (
+          <Box
+            sx={{
+              mt: 2,
+              px: 2,
+              py: 1.5,
+              borderRadius: 4,
+              bgcolor: 'rgba(248, 113, 113, 0.10)',
+              border: '1px solid rgba(248, 113, 113, 0.18)',
+            }}
+          >
+            <Typography color="error" variant="body2">
+              {renameError}
+            </Typography>
+          </Box>
+        ) : null}
+      </ThemedDialog>
+
+      <ThemedDialog
+        open={Boolean(deleteTarget)}
+        onClose={closeDeleteDialog}
+        eyebrow="Library"
+        title="Delete flashcard set"
+        description={
+          deleteTarget
+            ? `Delete "${deleteTarget.name}" from your library? This action cannot be undone.`
+            : ''
+        }
+        actions={
+          <>
+            <Button
+              onClick={closeDeleteDialog}
+              color="inherit"
+              disabled={activeSetId === deleteTarget?.id}
+              sx={{ color: 'text.secondary' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={activeSetId === deleteTarget?.id}
+              sx={{
+                bgcolor: 'error.main',
+                '&:hover': {
+                  bgcolor: 'error.dark',
+                },
+              }}
+            >
+              {activeSetId === deleteTarget?.id ? 'Deleting...' : 'Delete set'}
+            </Button>
+          </>
+        }
+      >
+        {deleteError ? (
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
+              borderRadius: 4,
+              bgcolor: 'rgba(248, 113, 113, 0.10)',
+              border: '1px solid rgba(248, 113, 113, 0.18)',
+            }}
+          >
+            <Typography color="error" variant="body2">
+              {deleteError}
+            </Typography>
+          </Box>
+        ) : null}
+      </ThemedDialog>
     </AppShell>
   );
 }
