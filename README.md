@@ -13,7 +13,7 @@
 [![Groq](https://img.shields.io/badge/Groq-LLM-FF6B35?style=flat-square&logo=groq)](https://groq.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-Payments-626EDD?style=flat-square&logo=stripe)](https://stripe.com/)
 
-[Live Demo](https://flashbot-roan.vercel.app) • [Features](#-features) • [Getting Started](#-getting-started) • [API Routes](#api-routes)
+[Live Demo](https://flashbot-roan.vercel.app)
 
 </div>
 
