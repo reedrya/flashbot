@@ -131,7 +131,7 @@ export default function Flashcards() {
       description="Open a set and continue studying."
     >
       <Box sx={{ display: 'grid', gap: { xs: 4, md: 6 } }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
+        <Stack className="reveal reveal-delay-1" direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
           <Chip
             label={`${flashcardSets.length} set${flashcardSets.length === 1 ? '' : 's'}`}
             sx={{
@@ -158,7 +158,7 @@ export default function Flashcards() {
         ) : null}
 
         {!isLoading && flashcardSets.length > 0 ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={3} className="grid-stagger">
             {flashcardSets.map((flashcardSet) => (
               <Grid item xs={12} md={6} key={flashcardSet.id}>
                 <Card
@@ -188,7 +188,7 @@ export default function Flashcards() {
                       },
                     }}
                   >
-                    <CardContent sx={{ px: 7, py: 4, width: '100%' }}>
+                    <CardContent sx={{ px: 7.5, py: 4, width: '100%' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
                         <Typography variant="h5" sx={{ lineHeight: 1.15, overflowWrap: 'anywhere' }}>
                           {flashcardSet.name}

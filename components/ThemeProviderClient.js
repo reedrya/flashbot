@@ -85,9 +85,29 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
+          position: 'relative',
+          overflow: 'hidden',
           backgroundColor: 'rgba(17, 24, 45, 0.88)',
           border: '1px solid rgba(148, 163, 184, 0.14)',
           boxShadow: '0 24px 60px rgba(2, 6, 23, 0.28)',
+          transition:
+            'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background:
+              'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 34%)',
+            opacity: 0.55,
+          },
+          '@media (hover: hover) and (pointer: fine)': {
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              borderColor: 'rgba(142, 168, 255, 0.24)',
+              boxShadow: '0 30px 70px rgba(2, 6, 23, 0.34)',
+            },
+          },
         },
       },
     },
@@ -100,6 +120,13 @@ const theme = createTheme({
           borderRadius: 999,
           paddingInline: 18,
           minHeight: 44,
+          transition:
+            'transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease',
+          '@media (hover: hover) and (pointer: fine)': {
+            '&:hover': {
+              transform: 'translateY(-1px)',
+            },
+          },
         },
       },
     },
@@ -118,6 +145,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 999,
+          transition:
+            'transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease',
+          '@media (hover: hover) and (pointer: fine)': {
+            '&:hover': {
+              transform: 'translateY(-1px)',
+            },
+          },
         },
       },
     },

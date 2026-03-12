@@ -4,14 +4,23 @@
   margin: 0;
 }
 
+:root {
+  --motion-duration-fast: 180ms;
+  --motion-duration-medium: 420ms;
+  --motion-duration-slow: 14s;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
+  position: relative;
   min-height: 100vh;
   color: #f4f7fb;
   background-color: #0b1020;
+  overflow-x: hidden;
 }
 
 a {
@@ -19,7 +28,305 @@ a {
   text-decoration: none;
 }
 
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+
+body::before {
+  top: -10rem;
+  left: -8rem;
+  width: 24rem;
+  height: 24rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(142, 168, 255, 0.34), rgba(142, 168, 255, 0));
+  animation: ambientFloat var(--motion-duration-slow) var(--motion-ease) infinite alternate;
+}
+
+body::after {
+  right: -8rem;
+  bottom: 8rem;
+  width: 22rem;
+  height: 22rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.18), rgba(103, 232, 249, 0));
+  animation: ambientFloatSecondary 18s var(--motion-ease) infinite alternate;
+}
+
 ::selection {
   background: rgba(142, 168, 255, 0.32);
   color: #f8fbff;
+}
+
+.page-shell {
+  position: relative;
+}
+
+.page-shell::after {
+  content: '';
+  position: absolute;
+  top: 5.5rem;
+  left: 50%;
+  width: min(92vw, 78rem);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, rgba(142, 168, 255, 0), rgba(142, 168, 255, 0.32), rgba(103, 232, 249, 0.12), rgba(142, 168, 255, 0));
+  opacity: 0.6;
+}
+
+.page-heading,
+.page-content,
+.reveal {
+  opacity: 0;
+  animation: fadeUp var(--motion-duration-medium) var(--motion-ease) forwards;
+}
+
+.page-heading {
+  animation-delay: 60ms;
+}
+
+.page-content {
+  animation-delay: 120ms;
+}
+
+.scroll-reveal,
+.scroll-stagger,
+.bubble-cluster {
+  opacity: 0;
+}
+
+.scroll-reveal[data-visible='true'] {
+  opacity: 1;
+  animation: fadeUp var(--motion-duration-medium) var(--motion-ease) forwards;
+}
+
+.scroll-reveal-delay-1[data-visible='true'] {
+  animation-delay: 140ms;
+}
+
+.scroll-reveal-delay-2[data-visible='true'] {
+  animation-delay: 220ms;
+}
+
+.scroll-reveal-delay-3[data-visible='true'] {
+  animation-delay: 300ms;
+}
+
+.scroll-reveal-delay-4[data-visible='true'] {
+  animation-delay: 380ms;
+}
+
+.reveal-delay-1 {
+  animation-delay: 180ms;
+}
+
+.reveal-delay-2 {
+  animation-delay: 280ms;
+}
+
+.reveal-delay-3 {
+  animation-delay: 380ms;
+}
+
+.reveal-delay-4 {
+  animation-delay: 480ms;
+}
+
+.float-card {
+  animation: cardFloat 7s ease-in-out infinite;
+}
+
+.grid-stagger > * {
+  opacity: 0;
+  animation: fadeUp var(--motion-duration-medium) var(--motion-ease) forwards;
+}
+
+.grid-stagger > *:nth-child(1) {
+  animation-delay: 140ms;
+}
+
+.grid-stagger > *:nth-child(2) {
+  animation-delay: 220ms;
+}
+
+.grid-stagger > *:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.grid-stagger > *:nth-child(4) {
+  animation-delay: 380ms;
+}
+
+.grid-stagger > *:nth-child(5) {
+  animation-delay: 460ms;
+}
+
+.grid-stagger > *:nth-child(6) {
+  animation-delay: 540ms;
+}
+
+.scroll-stagger[data-visible='true'] {
+  opacity: 1;
+}
+
+.scroll-stagger .MuiGrid-item {
+  opacity: 0;
+}
+
+.scroll-stagger[data-visible='true'] .MuiGrid-item {
+  animation: fadeUp var(--motion-duration-medium) var(--motion-ease) forwards;
+}
+
+.scroll-stagger[data-visible='true'] .MuiGrid-item:nth-child(1) {
+  animation-delay: 100ms;
+}
+
+.scroll-stagger[data-visible='true'] .MuiGrid-item:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.scroll-stagger[data-visible='true'] .MuiGrid-item:nth-child(3) {
+  animation-delay: 260ms;
+}
+
+.scroll-stagger[data-visible='true'] .MuiGrid-item:nth-child(4) {
+  animation-delay: 340ms;
+}
+
+.bubble-cluster {
+  position: absolute;
+  inset: -2rem 0 auto auto;
+  width: min(28rem, 42vw);
+  height: 9rem;
+  pointer-events: none;
+}
+
+.scroll-reveal[data-visible='true'] .bubble-cluster {
+  opacity: 1;
+}
+
+.bubble {
+  position: absolute;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(17, 24, 45, 0.7);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.2);
+  color: #d7e3ff;
+  font-size: 0.76rem;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.92);
+}
+
+.bubble-primary {
+  background: rgba(142, 168, 255, 0.12);
+  color: #c9d6ff;
+}
+
+.bubble-secondary {
+  background: rgba(103, 232, 249, 0.1);
+  color: #bdf5ff;
+}
+
+.bubble-default {
+  background: rgba(17, 24, 45, 0.82);
+}
+
+.scroll-reveal[data-visible='true'] .bubble:nth-child(1) {
+  animation: bubblePop 520ms var(--motion-ease) 160ms forwards;
+}
+
+.scroll-reveal[data-visible='true'] .bubble:nth-child(2) {
+  animation: bubblePop 520ms var(--motion-ease) 260ms forwards;
+}
+
+.scroll-reveal[data-visible='true'] .bubble:nth-child(3) {
+  animation: bubblePop 520ms var(--motion-ease) 360ms forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes bubblePop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes ambientFloat {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(3rem, 2rem, 0) scale(1.08);
+  }
+}
+
+@keyframes ambientFloatSecondary {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(-2.5rem, -2rem, 0) scale(1.12);
+  }
+}
+
+@keyframes cardFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-reveal,
+  .scroll-stagger,
+  .bubble-cluster,
+  .bubble,
+  .scroll-stagger .MuiGrid-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

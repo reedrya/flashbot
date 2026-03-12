@@ -193,7 +193,7 @@ export default function GenerateClient() {
       title="Create polished flashcards from any study material."
       description="Paste in notes, reading excerpts, or technical concepts and generate a clean set of cards you can review, flip through, and save."
     >
-      <Grid container spacing={3.5}>
+      <Grid container spacing={3.5} className="grid-stagger">
         <Grid item xs={12} md={8}>
           <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
             <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
@@ -380,7 +380,7 @@ export default function GenerateClient() {
       </Grid>
 
       {flashcards.length > 0 ? (
-        <Box sx={{ mt: { xs: 5, md: 7 } }}>
+        <Box sx={{ mt: { xs: 5, md: 7 } }} className="reveal reveal-delay-2">
           <Stack
             direction={{ xs: 'column', md: 'row' }}
             spacing={2}
@@ -403,7 +403,7 @@ export default function GenerateClient() {
             </Button>
           </Stack>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={3} className="grid-stagger">
             {flashcards.map((flashcard, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card
