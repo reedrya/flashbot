@@ -72,7 +72,7 @@ export default function Home() {
   const [checkoutPlanId, setCheckoutPlanId] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const pricingPlans = useMemo(() => getPublicPlanCatalog(), []);
-  const [copiedKey, setCopiedKey] = useState('');
+  const [isTechStackOpen, setIsTechStackOpen] = useState(false);
 
   useEffect(() => {
     async function loadBilling() {
@@ -155,9 +155,9 @@ export default function Home() {
   };
 
   const workflow = [
-    'Paste source material into the generator.',
-    'Review the AI-created flashcards instantly.',
-    'Save polished sets for future study sessions.',
+    'Paste your study material into the generator.',
+    'Review the generated flashcards.',
+    'Save sets for future review sessions.',
   ];
 
   const currentPlanId = billing?.planId || 'free';
@@ -209,7 +209,7 @@ export default function Home() {
                 <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 640, lineHeight: 1.8 }}>
                   FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time studying it.
                 </Typography>
-                <Stack sx={{ pb: 3 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Stack sx={{ pb: 0 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                   <Button component={Link} href="/generate" variant="contained" size="large">
                     Start generating
                   </Button>
@@ -224,58 +224,80 @@ export default function Home() {
                   </Button>
                 </Stack>
                 <Box
+                  className="tech-stack-container"
+                  onMouseLeave={() => setIsTechStackOpen(false)}
+                  onFocusCapture={() => setIsTechStackOpen(true)}
+                  onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) {
+                      setIsTechStackOpen(false);
+                    }
+                  }}
                   sx={{
                     position: 'relative',
-                    overflow: 'hidden',
-                    p: 2.5,
-                    borderRadius: 2,
-                    background:
-                      'linear-gradient(135deg, rgba(17, 24, 45, 0.96), rgba(15, 23, 42, 0.9) 55%, rgba(30, 41, 59, 0.84))',
-                    border: '1px solid rgba(148, 163, 184, 0.14)',
-                    boxShadow: '0 24px 60px rgba(2, 6, 23, 0.28)',
-                    minWidth: 240,
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: 0,
-                      background:
-                        'radial-gradient(circle at top left, rgba(142, 168, 255, 0.18), transparent 35%), radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.1), transparent 28%)',
-                      pointerEvents: 'none',
-                    },
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    overflow: 'visible',
+                    minWidth: 'auto',
                   }}
                 >
                   <Stack spacing={2} sx={{ position: 'relative', zIndex: 1 }}>
                     <Stack
-                      sx={{ pl: 2 }}
                       direction={{ xs: 'column', sm: 'row' }}
                       spacing={1}
                       alignItems={{ xs: 'flex-start', sm: 'center' }}
                       justifyContent="space-between"
                     >
                       <Box
+                        component="button"
+                        type="button"
+                        role="button"
+                        tabIndex={0}
+                        className="tech-stack-trigger"
+                        onMouseEnter={() => setIsTechStackOpen(true)}
                         sx={{
-                          px: 1.8,
-                          py: 0.75,
+                          px: 2.5,
+                          py: 2,
                           borderRadius: 999,
-                          bgcolor: 'rgba(142, 168, 255, 0.12)',
-                          border: '1px solid rgba(142, 168, 255, 0.18)',
+                          bgcolor: 'rgba(15, 23, 42, 0.98)',
+                          border: '1px solid rgba(142, 168, 255, 0.9)',
                           color: 'primary.main',
                           fontSize: '0.72rem',
                           fontWeight: 700,
                           letterSpacing: '0.08em',
                           textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.9)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(15, 23, 42, 1)',
+                            borderColor: 'rgba(191, 219, 254, 1)',
+                          },
+                          '&:focus-visible': {
+                            boxShadow: '0 0 0 2px rgba(191, 219, 254, 0.9)',
+                          },
                         }}
                       >
                         Tech stack
                       </Box>
                     </Stack>
                     <Box
+                      className="tech-stack-grid"
                       sx={{
-                        px: 3,
-                        py: 1,
+                        pt: 0.5,
                         display: 'grid',
-                        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          sm: 'repeat(2, minmax(0, 1fr))',
+                          lg: 'repeat(3, minmax(0, 1fr))',
+                        },
                         gap: 1.25,
+                        maxHeight: isTechStackOpen ? 360 : 0,
+                        opacity: isTechStackOpen ? 1 : 0,
+                        transform: isTechStackOpen ? 'translateY(0)' : 'translateY(-6px)',
+                        overflow: 'hidden',
+                        pointerEvents: isTechStackOpen ? 'auto' : 'none',
+                        transition:
+                          'max-height 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease-out, transform 0.35s ease-out',
                       }}
                     >
                       {techStack.map((tool) => (
@@ -428,11 +450,11 @@ export default function Home() {
 
         <ScrollReveal className="scroll-reveal scroll-reveal-delay-2">
           <Box>
-            <Stack spacing={1} sx={{ mb: -4.5 }}>
+            <Stack spacing={1} sx={{ mb: -4.5, mt: -5}}>
               <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
-                Why it works
+                How it works
               </Typography>
-              <Typography variant="h3">Everything important stays simple.</Typography>
+              <Typography variant="h3">Paste, review, save.</Typography>
             </Stack>
           </Box>
         </ScrollReveal>
