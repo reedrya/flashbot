@@ -140,6 +140,7 @@ body::after {
 
 .float-card {
   animation: cardFloat 7s ease-in-out infinite;
+  will-change: transform;
 }
 
 .grid-stagger > * {
@@ -328,5 +329,347 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+.typing-effect {
+  display: inline;
+}
+
+/* 
+  Styles for the typing cursor effect. 
+  The animated blinking '|' is rendered at the end of the typing-effect text.
+*/
+.typing-cursor {
+  display: inline-block;                  /* Allows sizing and animating as an element */
+  width: 0.1ch;                           /* Sets cursor width close to a character's width */
+  height: 1em;                            /* Matches the height of surrounding text */
+  margin-left: 1px;                       /* Slight gap from the previous character */
+  vertical-align: -0.08em;                /* Aligns cursor with baseline */
+  border-right: 2px solid #67e8f9;      /* Blinking cursor bar */
+  animation: typingCursorBlink 0.75s step-end infinite;
+}
+
+@keyframes typingCursorBlink {
+  from, to { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.output-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(142, 168, 255, 0.2);
+  background: rgba(142, 168, 255, 0.1);
+  color: #c9d6ff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.output-pill-muted {
+  border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(226, 232, 240, 0.82);
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.output-flip-scene {
+  position: relative;
+  min-height: 12.5rem;
+  border-radius: 18px;
+  perspective: 1400px;
+  outline: none;
+}
+
+.output-flip-scene:focus-visible {
+  box-shadow: 0 0 0 2px rgba(103, 232, 249, 0.24);
+}
+
+.output-flip-card {
+  position: relative;
+  width: 100%;
+  min-height: inherit;
+  transform-style: preserve-3d;
+  transition:
+    transform 680ms var(--motion-ease),
+    filter 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.output-flip-scene:hover .output-flip-card,
+.output-flip-scene:focus-visible .output-flip-card {
+  transform: rotateY(180deg) translateZ(0);
+}
+
+.output-flip-scene:hover .output-card-face,
+.output-flip-scene:focus-visible .output-card-face {
+  box-shadow: 0 22px 45px rgba(2, 6, 23, 0.34);
+}
+
+.output-flip-hint {
+  align-self: flex-end;
+  padding-right: 0.35rem;
+  color: rgba(191, 219, 254, 0.74);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.output-panel {
+  position: relative;
+  border-radius: 20px;
+  padding: 1px;
+  overflow: hidden;
+  background: linear-gradient(
+    120deg,
+    rgba(15, 23, 42, 0.96),
+    rgba(142, 168, 255, 0.45),
+    rgba(15, 23, 42, 0.96)
+  );
+}
+
+.output-panel::before {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 180deg,
+    rgba(142, 168, 255, 0) 0deg,
+    rgba(142, 168, 255, 0.34) 70deg,
+    rgba(103, 232, 249, 0.28) 140deg,
+    rgba(142, 168, 255, 0.12) 220deg,
+    rgba(142, 168, 255, 0) 360deg
+  );
+  animation: outputOrbit 10s linear infinite;
+  opacity: 0.55;
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+.output-panel-inner {
+  position: relative;
+  border-radius: 19px;
+  padding: 0.95rem;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(142, 168, 255, 0.24), transparent 55%),
+    radial-gradient(circle at 90% 65%, rgba(103, 232, 249, 0.22), transparent 52%),
+    rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  backdrop-filter: blur(14px);
+}
+
+.output-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 1rem 1rem 0.95rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(142, 168, 255, 0.2), transparent 72%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(13, 18, 32, 0.92));
+  border: 1px solid rgba(142, 168, 255, 0.34);
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(2, 6, 23, 0.26);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.output-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(142, 168, 255, 0) 0%,
+    rgba(59, 130, 246, 0.12) 40%,
+    rgba(56, 189, 248, 0.08) 60%,
+    rgba(142, 168, 255, 0) 90%
+  );
+  transform: translateX(-40%);
+  opacity: 0.4;
+  animation: outputSheen 5.5s var(--motion-ease) infinite;
+  pointer-events: none;
+}
+
+.output-card-face {
+  position: absolute;
+  inset: 0;
+  min-height: 12.5rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.output-card-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.55rem;
+}
+
+.output-card-body {
+  position: relative;
+  z-index: 1;
+  padding-top: 1rem;
+  line-height: 1.72;
+  font-size: 1rem;
+  color: #edf4ff;
+  text-wrap: balance;
+  text-align: center;
+}
+
+.output-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(142, 168, 255, 0.14);
+  border: 1px solid rgba(142, 168, 255, 0.22);
+  color: #d6e1ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.output-badge-secondary {
+  background: rgba(103, 232, 249, 0.12);
+  border-color: rgba(103, 232, 249, 0.22);
+  color: #c6f7ff;
+}
+
+.output-card-front {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(142, 168, 255, 0.24), transparent 60%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(12, 18, 33, 0.92));
+}
+
+.output-card-back {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(103, 232, 249, 0.24), transparent 58%),
+    linear-gradient(180deg, rgba(19, 33, 58, 0.95), rgba(12, 18, 33, 0.94));
+  border-color: rgba(103, 232, 249, 0.32);
+}
+
+.input-preview-shell {
+  position: relative;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.94),
+    rgba(142, 168, 255, 0.5),
+    rgba(103, 232, 249, 0.3),
+    rgba(15, 23, 42, 0.94)
+  );
+  overflow: hidden;
+  box-shadow: 0 18px 38px rgba(2, 6, 23, 0.2);
+}
+
+.input-preview-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 28%);
+  pointer-events: none;
+}
+
+.input-preview-field {
+  position: relative;
+  border-radius: 15px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  background:
+    linear-gradient(180deg, rgba(8, 13, 24, 0.98), rgba(10, 16, 30, 0.96)),
+    radial-gradient(circle at 0% 0%, rgba(71, 85, 105, 0.18), transparent 70%);
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  height: 7.6rem;
+  min-height: 7.6rem;
+  max-height: 7.6rem;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  cursor: text;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .output-flip-scene {
+    min-height: auto;
+    perspective: none;
+  }
+
+  .output-flip-card {
+    min-height: auto;
+    display: grid;
+    gap: 0.85rem;
+    transform: none !important;
+  }
+
+  .output-card-face {
+    position: relative;
+    min-height: auto;
+    transform: none !important;
+  }
+
+  .output-flip-hint {
+    display: none;
+  }
+}
+
+@keyframes outputOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes outputSheen {
+  0%,
+  45% {
+    transform: translateX(-45%);
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateX(45%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .output-flip-scene {
+    min-height: auto;
+    perspective: none;
+  }
+
+  .output-flip-card {
+    min-height: auto;
+    display: grid;
+    gap: 0.85rem;
+    transform: none !important;
+  }
+
+  .output-card-face {
+    position: relative;
+    min-height: auto;
+    transform: none !important;
+  }
+
+  .output-flip-hint {
+    display: none;
   }
 }

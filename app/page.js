@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
+import DrawIcon from '@mui/icons-material/Draw';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import ScrollReveal from '@/components/ScrollReveal';
+import TypingEffect from '@/components/typing-effect';
 import ThemedDialog from '@/components/ThemedDialog';
 import getStripe from '@/utils/get-stripe';
 import { getPublicPlanCatalog, isUnlimitedLimit } from '@/lib/plans';
@@ -51,7 +54,7 @@ const techStack = [
     name: 'Material UI',
     href: 'https://mui.com/material-ui/',
     accent: '#38BDF8',
-    category: 'Interface system',
+    category: 'User interface',
     logo: <Image src="/images/mui-logo.svg" alt="Material UI" width={22} height={22} />,
   },
   {
@@ -69,6 +72,7 @@ export default function Home() {
   const [checkoutPlanId, setCheckoutPlanId] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const pricingPlans = useMemo(() => getPublicPlanCatalog(), []);
+  const [copiedKey, setCopiedKey] = useState('');
 
   useEffect(() => {
     async function loadBilling() {
@@ -203,7 +207,7 @@ export default function Home() {
                   Smarter flashcards for faster learning.
                 </Typography>
                 <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 640, lineHeight: 1.8 }}>
-                  FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time reviewing it.
+                  FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time studying it.
                 </Typography>
                 <Stack sx={{ pb: 3 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                   <Button component={Link} href="/generate" variant="contained" size="large">
@@ -224,7 +228,7 @@ export default function Home() {
                     position: 'relative',
                     overflow: 'hidden',
                     p: 2.5,
-                    borderRadius: 5,
+                    borderRadius: 2,
                     background:
                       'linear-gradient(135deg, rgba(17, 24, 45, 0.96), rgba(15, 23, 42, 0.9) 55%, rgba(30, 41, 59, 0.84))',
                     border: '1px solid rgba(148, 163, 184, 0.14)',
@@ -242,24 +246,12 @@ export default function Home() {
                 >
                   <Stack spacing={2} sx={{ position: 'relative', zIndex: 1 }}>
                     <Stack
-                      px={4}
-                      py={1}
+                      sx={{ pl: 2 }}
                       direction={{ xs: 'column', sm: 'row' }}
                       spacing={1}
                       alignItems={{ xs: 'flex-start', sm: 'center' }}
                       justifyContent="space-between"
                     >
-                      <Box>
-                        <Typography
-                          variant="overline"
-                          sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.14em' }}
-                        >
-                          Built with
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', maxWidth: 420, lineHeight: 1.7 }}>
-                          A modern stack tuned for fast generation, secure billing, and a clean study experience.
-                        </Typography>
-                      </Box>
                       <Box
                         sx={{
                           px: 1.8,
@@ -274,7 +266,7 @@ export default function Home() {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Core stack
+                        Tech stack
                       </Box>
                     </Stack>
                     <Box
@@ -348,50 +340,86 @@ export default function Home() {
               <Card
                 className="float-card"
                 sx={{
-                  p: 1,
-                  py: 2,
-                  borderRadius: 6,
+                  p: 0,
+                  borderRadius: 3,
                   background: 'linear-gradient(180deg, rgba(17, 24, 45, 0.96), rgba(9, 14, 26, 0.94))',
                 }}
               >
                 <CardContent sx={{ px: { xs: 3.75, md: 4.25 }, py: { xs: 2.75, md: 3.25 } }}>
                   <Stack spacing={3}>
-                    <Stack direction="row" spacing={1} sx={{ pl: 3.75 }}>
+                    <Stack direction="row" spacing={1} sx={{ pb: 1 }}>
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fb7185' }} />
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fbbf24' }} />
                       <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#34d399' }} />
                     </Stack>
-                    <Box sx={{ px: 4.25, py: 2.75, borderRadius: 5, bgcolor: 'rgba(142, 168, 255, 0.08)', border: '1px solid rgba(142, 168, 255, 0.12)' }}>
-                      <Typography variant="overline" sx={{ pl: 2, pt: 1.75, color: 'secondary.main', lineHeight: 1 }}>
-                        Input
-                      </Typography>
-                      <Typography variant="body1" sx={{ pl: 2, pb: 0.75, mt: 0.5, color: 'text.secondary', lineHeight: 1.8 }}>
-                        Neural networks learn patterns by adjusting weights during training and using those learned patterns to make predictions on unseen data.
-                      </Typography>
-                    </Box>
-                    <Box sx={{ px: 5, py: 3, borderRadius: 5, bgcolor: 'rgba(17, 24, 45, 0.84)', border: '1px solid rgba(148, 163, 184, 0.12)' }}>
-                      <Typography variant="overline" sx={{ pl: 2, pt: 1.75, color: 'primary.main', lineHeight: 1 }}>
-                        Output
-                      </Typography>
-                      <Stack spacing={1.5} sx={{ mt: 0.75 }}>
-                        <Box sx={{ px: 3.75, py: 2.5, borderRadius: 4, bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-                          <Typography variant="body2" sx={{ px: 1, color: 'text.secondary' }}>
-                            Front
-                          </Typography>
-                          <Typography variant="body1" sx={{ px: 1.5, mt: 0.5 }}>
-                            How do neural networks improve during training?
-                          </Typography>
-                        </Box>
-                        <Box sx={{ px: 3.25, py: 2.25, borderRadius: 4, bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-                          <Typography variant="body2" sx={{ px: 1, pt: 1, color: 'text.secondary' }}>
-                            Back
-                          </Typography>
-                          <Typography variant="body1" sx={{ px: 1.5, pb: 1, mt: 0.5 }}>
-                            They adjust weights based on errors so future predictions become more accurate.
-                          </Typography>
-                        </Box>
+                    <Stack spacing={1.1}>
+                      <Stack direction="row" alignItems="center" spacing={1.25}>
+                        <DrawIcon sx={{ color: 'secondary.main', fontSize: 18, opacity: 0.95 }} />
+                        <Typography variant="overline" sx={{ color: 'secondary.main', lineHeight: 1 }}>
+                          Input
+                        </Typography>
                       </Stack>
-                    </Box>
+                      <Box className="input-preview-shell">
+                        <Box className="input-preview-field">
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              m: 0,
+                              color: 'rgba(226, 232, 240, 0.9)',
+                              lineHeight: 1.7,
+                              fontSize: '0.95rem',
+                            }}
+                          >
+                            <TypingEffect text="Neural networks learn patterns by adjusting weights during training and using those learned patterns to make predictions on unseen data." />
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Stack>
+                    <Stack spacing={1.1} sx={{ pt: 2 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Stack direction="row" spacing={1.25} alignItems="center">
+                          <AutoAwesomeOutlinedIcon sx={{ color: 'primary.main', fontSize: 18, opacity: 0.9 }} />
+                          <Typography variant="overline" sx={{ color: 'primary.main', lineHeight: 1 }}>
+                            Output
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                      <Stack spacing={1.1}>
+                        <Box
+                          className="output-flip-scene"
+                          tabIndex={0}
+                          aria-label="Sample flashcard preview. Hover or focus to flip between the front and back."
+                        >
+                          <Box className="output-flip-card">
+                            <Box className="output-card output-card-face output-card-front">
+                              <Stack direction="row" alignItems="center" justifyContent="space-between" className="output-card-header">
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                  <Box className="output-badge">Front</Box>
+                                </Stack>
+                              </Stack>
+                              <Typography variant="body1" className="output-card-body">
+                                How do neural networks <br /> 
+                                improve during training?
+                              </Typography>
+                            </Box>
+
+                            <Box className="output-card output-card-face output-card-back">
+                              <Stack direction="row" alignItems="center" justifyContent="space-between" className="output-card-header">
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                  <Box className="output-badge output-badge-secondary">Back</Box>
+                                </Stack>
+                              </Stack>
+                              <Typography variant="body1" className="output-card-body">
+                                They adjust weights based on errors so future predictions become more accurate.
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                        <Typography variant="caption" className="output-flip-hint" sx={{ pt: 1.5 }}>
+                          Hover or focus to flip
+                        </Typography>
+                      </Stack>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
