@@ -7,7 +7,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18.17+-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Material UI](https://img.shields.io/badge/Material%20UI-Latest-007FFF?style=flat-square&logo=mui)](https://mui.com/)
+[![Material UI](https://img.shields.io/badge/Material%20UI-5.18-007FFF?style=flat-square&logo=mui)](https://mui.com/)
 [![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk)](https://clerk.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com/)
 [![Groq](https://img.shields.io/badge/Groq-LLM-FF6B35?style=flat-square&logo=groq)](https://groq.com/)
