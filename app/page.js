@@ -340,18 +340,17 @@ export default function Home() {
               <Card
                 className="float-card"
                 sx={{
-                  p: 0,
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: 'linear-gradient(180deg, rgba(17, 24, 45, 0.96), rgba(9, 14, 26, 0.94))',
                 }}
               >
+                <Stack direction="row" spacing={1} sx={{ pl: 2.5, pt: 2, pb: 1 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fb7185' }} />
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fbbf24' }} />
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#34d399' }} />
+                </Stack>
                 <CardContent sx={{ px: { xs: 3.75, md: 4.25 }, py: { xs: 2.75, md: 3.25 } }}>
                   <Stack spacing={3}>
-                    <Stack direction="row" spacing={1} sx={{ pb: 1 }}>
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fb7185' }} />
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fbbf24' }} />
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#34d399' }} />
-                    </Stack>
                     <Stack spacing={1.1}>
                       <Stack direction="row" alignItems="center" spacing={1.25}>
                         <DrawIcon sx={{ color: 'secondary.main', fontSize: 18, opacity: 0.95 }} />
