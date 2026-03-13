@@ -11,6 +11,58 @@ import ThemedDialog from '@/components/ThemedDialog';
 import getStripe from '@/utils/get-stripe';
 import { getPublicPlanCatalog, isUnlimitedLimit } from '@/lib/plans';
 
+const techStack = [
+  {
+    name: 'Next.js',
+    href: 'https://nextjs.org',
+    accent: '#d1d5db',
+    category: 'App framework',
+    logo: <Image src="/images/nextjs-white-icon.png" alt="Next.js" width={22} height={22} />,
+  },
+  {
+    name: 'Firebase',
+    href: 'https://firebase.google.com/',
+    accent: '#FFCA28',
+    category: 'Data layer',
+    logo: <Image src="/images/firebase-logo.svg" alt="Firebase" width={22} height={22} />,
+  },
+  {
+    name: 'Groq',
+    href: 'https://groq.com/',
+    accent: '#f59e0b',
+    category: 'AI inference',
+    logo: <Image src="/images/groq-logo.svg" alt="Groq" width={22} height={22} />,
+  },
+  {
+    name: 'Stripe',
+    href: 'https://stripe.com/',
+    accent: '#635bff',
+    category: 'Payments',
+    logo: (
+      <svg width="22" height="22" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect width="48" height="48" rx="10" fill="#635bff" />
+        <text x="50%" y="57%" dominantBaseline="middle" textAnchor="middle" fontSize="25" fontWeight="bold" fill="#fff">
+          S
+        </text>
+      </svg>
+    ),
+  },
+  {
+    name: 'Material UI',
+    href: 'https://mui.com/material-ui/',
+    accent: '#38BDF8',
+    category: 'Interface system',
+    logo: <Image src="/images/mui-logo.svg" alt="Material UI" width={22} height={22} />,
+  },
+  {
+    name: 'Clerk',
+    href: 'https://clerk.com',
+    accent: '#d1d5db',
+    category: 'Authentication',
+    logo: <Image src="/images/clerk-logo.svg" alt="Clerk" width={22} height={22} />,
+  },
+];
+
 export default function Home() {
   const { user, isLoaded } = useUser();
   const [billing, setBilling] = useState(null);
@@ -134,11 +186,11 @@ export default function Home() {
     <AppShell maxWidth="lg">
       <Box sx={{ display: 'grid', gap: { xs: 6, md: 10 } }}>
         <ScrollReveal className="scroll-reveal scroll-reveal-delay-1">
-          <Grid container spacing={4} alignItems="center">
+          <Grid container spacing={4} alignItems="flex-start">
             <Grid item xs={12} md={7}>
               <Stack spacing={3}>
                 <Chip
-                  label="AI flashcard set generator"
+                  label="AI Flashcard Set Generator"
                   sx={{
                     alignSelf: 'flex-start',
                     px: 1,
@@ -167,109 +219,128 @@ export default function Home() {
                     View pricing
                   </Button>
                 </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Box
-                    sx={{
-                      px: 1,
-                      py: 2,
-                      borderRadius: 4,
-                      bgcolor: 'rgba(17, 24, 45, 0.72)',
-                      border: '1px solid rgba(148, 163, 184, 0.12)',
-                      minWidth: 240,
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ pl: 6, color: 'text.secondary', mb: 0.5 }}>
-                      Built with
-                    </Typography>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    p: 2.5,
+                    borderRadius: 5,
+                    background:
+                      'linear-gradient(135deg, rgba(17, 24, 45, 0.96), rgba(15, 23, 42, 0.9) 55%, rgba(30, 41, 59, 0.84))',
+                    border: '1px solid rgba(148, 163, 184, 0.14)',
+                    boxShadow: '0 24px 60px rgba(2, 6, 23, 0.28)',
+                    minWidth: 240,
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: 0,
+                      background:
+                        'radial-gradient(circle at top left, rgba(142, 168, 255, 0.18), transparent 35%), radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.1), transparent 28%)',
+                      pointerEvents: 'none',
+                    },
+                  }}
+                >
+                  <Stack spacing={2} sx={{ position: 'relative', zIndex: 1 }}>
+                    <Stack
+                      px={4}
+                      py={1}
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={1}
+                      alignItems={{ xs: 'flex-start', sm: 'center' }}
+                      justifyContent="space-between"
+                    >
+                      <Box>
+                        <Typography
+                          variant="overline"
+                          sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.14em' }}
+                        >
+                          Built with
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', maxWidth: 420, lineHeight: 1.7 }}>
+                          A modern stack tuned for fast generation, secure billing, and a clean study experience.
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          px: 1.8,
+                          py: 0.75,
+                          borderRadius: 999,
+                          bgcolor: 'rgba(142, 168, 255, 0.12)',
+                          border: '1px solid rgba(142, 168, 255, 0.18)',
+                          color: 'primary.main',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Core stack
+                      </Box>
+                    </Stack>
                     <Box
                       sx={{
+                        px: 3,
                         py: 1,
-                        px: 5,
-                        pt: 0.5,
                         display: 'grid',
-                        gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(3, minmax(0, 1fr))' },
-                        gap: 1,
-                        '& > *': {
-                          width: '100%',
-                          justifyContent: 'flex-start',
-                        },
+                        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
+                        gap: 1.25,
                       }}
                     >
-                      <Button
-                        component="a"
-                        href="https://nextjs.org"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<Image src="/images/nextjs-white-icon.png" alt="Next.js" width={22} height={22} />}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#d1d5db', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Next.js"
-                      >
-                        Next.js
-                      </Button>
-                      <Button
-                        component="a"
-                        href="https://firebase.google.com/"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<Image src="/images/firebase-logo.svg" alt="Firebase" width={22} height={22} />}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#FFCA28', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Firebase"
-                      >
-                        Firebase
-                      </Button>
-                      <Button
-                        component="a"
-                        href="https://groq.com/"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<Image src="/images/groq-logo.svg" alt="Groq" width={22} height={22} />}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#f59e0b', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Groq"
-                      >
-                        Groq
-                      </Button>
-                      <Button
-                        component="a"
-                        href="https://stripe.com/"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<svg width="22" height="22" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#635bff"/><text x="50%" y="57%" dominantBaseline="middle" textAnchor="middle" fontSize="25" fontWeight="bold" fill="#fff">S</text></svg>}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#635bff', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Stripe"
-                      >
-                        Stripe
-                      </Button>
-                      <Button
-                        component="a"
-                        href="https://mui.com/material-ui/"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<Image src="/images/mui-logo.svg" alt="Material UI" width={22} height={22} />}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#38BDF8', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Material UI"
-                      >
-                        Material UI
-                      </Button>
-                      <Button
-                        component="a"
-                        href="https://clerk.com"
-                        target="_blank"
-                        rel="noopener"
-                        size="small"
-                        startIcon={<Image src="/images/clerk-logo.svg" alt="Clerk" width={22} height={22} />}
-                        sx={{ color: '#fff', minWidth: 0, px: 1.25, borderRadius: 999, transition: 'color 0.15s', '&:hover': { color: '#d1d5db', bgcolor: 'rgba(255,255,255,0.08)' } }}
-                        aria-label="Clerk"
-                      >
-                        Clerk
-                      </Button>
+                      {techStack.map((tool) => (
+                        <Box
+                          key={tool.name}
+                          component="a"
+                          href={tool.href}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={tool.name}
+                          sx={{
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            px: 1.5,
+                            py: 1.35,
+                            borderRadius: 3,
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025))',
+                            border: '1px solid rgba(148, 163, 184, 0.12)',
+                            backdropFilter: 'blur(14px)',
+                            transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              borderColor: tool.accent,
+                              boxShadow: `0 16px 32px ${tool.accent}22`,
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 42,
+                              height: 42,
+                              borderRadius: 2.5,
+                              display: 'grid',
+                              placeItems: 'center',
+                              bgcolor: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.08)',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {tool.logo}
+                          </Box>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#fff' }}>
+                              {tool.name}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              {tool.category}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
                     </Box>
-                  </Box>
-                </Stack>
+                  </Stack>
+                </Box>
               </Stack>
             </Grid>
 
@@ -278,6 +349,7 @@ export default function Home() {
                 className="float-card"
                 sx={{
                   p: 1,
+                  py: 2,
                   borderRadius: 6,
                   background: 'linear-gradient(180deg, rgba(17, 24, 45, 0.96), rgba(9, 14, 26, 0.94))',
                 }}

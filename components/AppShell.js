@@ -118,6 +118,7 @@ export default function AppShell({
               sx={{
                 ml: 2,
                 p: 0.5,
+                pr: 1.5,
                 position: 'relative',
                 display: { xs: 'none', md: 'flex' },
                 borderRadius: 999,
@@ -157,6 +158,7 @@ export default function AppShell({
                   color="inherit"
                   variant="text"
                   sx={{
+                    px: 3,
                     position: 'relative',
                     zIndex: 1,
                     color: activeNavHref === item.href ? '#08111f' : 'text.secondary',
