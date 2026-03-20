@@ -79,24 +79,12 @@ export default function Flashcard() {
       title={setName || 'Flashcards'}
       description="Click a card to flip it."
     >
-      <Box sx={{ display: 'grid', gap: { xs: 4, md: 6 } }}>
+      <Box className="content-grid-md">
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <Chip
-              label={`${flashcards.length} card${flashcards.length === 1 ? '' : 's'}`}
-              sx={{
-                bgcolor: 'rgba(142, 168, 255, 0.12)',
-                color: 'primary.main',
-                border: '1px solid rgba(142, 168, 255, 0.18)',
-              }}
-            />
+            <Chip label={`${flashcards.length} card${flashcards.length === 1 ? '' : 's'}`} className="status-chip" />
           </Stack>
-          <Button
-            component={Link}
-            href="/flashcards"
-            variant="outlined"
-            sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-          >
+          <Button component={Link} href="/flashcards" variant="outlined" className="button-outlined-muted">
             Back
           </Button>
         </Stack>
@@ -105,90 +93,39 @@ export default function Flashcard() {
         {!isLoading && !error && flashcards.length === 0 ? <Alert severity="info">This set is empty.</Alert> : null}
 
         {!isLoaded || isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <Box className="centered-loader">
             <CircularProgress />
           </Box>
         ) : null}
 
         {!isLoading && !error && flashcards.length > 0 ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={3} className="grid-stagger">
             {flashcards.map((flashcard, index) => (
               <Grid item xs={12} sm={6} md={4} key={`${flashcard.front}-${index}`}>
-                <Card
-                  onClick={() => handleCardClick(index)}
-                  sx={{
-                    height: 252,
-                    cursor: 'pointer',
-                    borderRadius: 6,
-                    transition: 'transform 0.25s ease, border-color 0.25s ease',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      borderColor: 'rgba(142, 168, 255, 0.3)',
-                    },
-                  }}
-                >
-                  <CardContent sx={{ height: '100%', p: 0 }}>
-                    <Box sx={{ perspective: '1000px', position: 'relative', width: '100%', height: '100%' }}>
-                      <Box
-                        sx={{
-                          transition: 'transform 0.6s',
-                          transformStyle: 'preserve-3d',
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            backfaceVisibility: 'hidden',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            p: 2.25,
-                          }}
-                        >
-                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                <Card onClick={() => handleCardClick(index)} className="flashcard-tile">
+                  <CardContent className="flashcard-tile-content">
+                    <Box className="flashcard-tile-scene">
+                      <Box className={`flashcard-tile-inner${flipped[index] ? ' is-flipped' : ''}`}>
+                        <Box className="flashcard-tile-face">
+                          <Typography variant="overline" className="flashcard-tile-label flashcard-tile-label-front">
                             Front
                           </Typography>
-                          <Typography
-                            variant="body1"
-                            align="center"
-                            sx={{ px: 4, fontSize: { xs: '0.98rem', md: '1.05rem' }, fontWeight: 600, lineHeight: 1.4, overflowWrap: 'anywhere' }}
-                          >
+                          <Typography variant="body1" align="center" className="flashcard-tile-front-copy">
                             {flashcard.front}
                           </Typography>
-                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography variant="body2" className="flashcard-tile-hint">
                             Tap to flip
                           </Typography>
                         </Box>
 
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            p: 2.25,
-                            background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
-                          }}
-                        >
-                          <Typography variant="overline" sx={{ px: 7, pt: 1, color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                        <Box className="flashcard-tile-face flashcard-tile-face-back">
+                          <Typography variant="overline" className="flashcard-tile-label flashcard-tile-label-back">
                             Back
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            align="center"
-                            sx={{ px: 4, fontSize: '0.86rem', lineHeight: 1.55, overflowWrap: 'anywhere' }}
-                          >
+                          <Typography variant="body2" align="center" className="flashcard-tile-back-copy">
                             {flashcard.back}
                           </Typography>
-                          <Typography variant="body2" sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}>
+                          <Typography variant="body2" className="flashcard-tile-hint">
                             Tap to flip
                           </Typography>
                         </Box>

@@ -191,7 +191,7 @@ export default function Flashcards() {
       title="Saved sets"
       description="Open a set and continue studying."
     >
-      <Box sx={{ display: 'grid', gap: { xs: 4, md: 6 } }}>
+      <Box className="content-grid-md">
         <Stack
           className="reveal reveal-delay-1"
           direction={{ xs: 'column', sm: 'row' }}
@@ -199,14 +199,7 @@ export default function Flashcards() {
           justifyContent="space-between"
           alignItems={{ xs: 'flex-start', sm: 'center' }}
         >
-          <Chip
-            label={`${flashcardSets.length} set${flashcardSets.length === 1 ? '' : 's'}`}
-            sx={{
-              bgcolor: 'rgba(142, 168, 255, 0.12)',
-              color: 'primary.main',
-              border: '1px solid rgba(142, 168, 255, 0.18)',
-            }}
-          />
+          <Chip label={`${flashcardSets.length} set${flashcardSets.length === 1 ? '' : 's'}`} className="status-chip" />
           <Button component={Link} href="/generate" variant="contained">
             New set
           </Button>
@@ -221,7 +214,7 @@ export default function Flashcards() {
         ) : null}
 
         {!isLoaded || isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <Box className="centered-loader">
             <CircularProgress />
           </Box>
         ) : null}
@@ -230,62 +223,32 @@ export default function Flashcards() {
           <Grid container spacing={3} className="grid-stagger">
             {flashcardSets.map((flashcardSet) => (
               <Grid item xs={12} md={6} key={flashcardSet.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 6,
-                    transition: 'transform 0.25s ease, border-color 0.25s ease',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      borderColor: 'rgba(142, 168, 255, 0.3)',
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => handleCardClick(flashcardSet.id)}
-                    sx={{
-                      flexGrow: 1,
-                      display: 'flex',
-                      alignItems: 'stretch',
-                      '& .MuiCardActionArea-focusHighlight': {
-                        backgroundColor: 'transparent',
-                      },
-                      '&:hover .MuiCardActionArea-focusHighlight': {
-                        opacity: 0,
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ px: 7.5, py: 4, width: '100%' }}>
+                <Card className="library-set-card">
+                  <CardActionArea onClick={() => handleCardClick(flashcardSet.id)} className="library-set-card-action">
+                    <CardContent className="library-set-card-content">
                       <Stack
                         direction="row"
                         justifyContent="space-between"
                         alignItems="flex-start"
                         spacing={2}
                       >
-                        <Typography variant="h5" sx={{ lineHeight: 1.15, overflowWrap: 'anywhere' }}>
+                        <Typography variant="h5" className="library-set-title">
                           {flashcardSet.name}
                         </Typography>
                         <Chip
                           label={`${flashcardSet.cardCount || 0} card${(flashcardSet.cardCount || 0) === 1 ? '' : 's'}`}
-                          sx={{
-                            bgcolor: 'rgba(142, 168, 255, 0.12)',
-                            color: 'primary.main',
-                            border: '1px solid rgba(142, 168, 255, 0.18)',
-                            fontSize: '0.95em',
-                          }}
+                          className="status-chip library-set-count-chip"
                         />
                       </Stack>
                     </CardContent>
                   </CardActionArea>
-                  <Stack direction="row" spacing={1} sx={{ px: 6, pb: { xs: 2.75, md: 3 } }}>
+                  <Stack direction="row" spacing={1} className="library-set-actions">
                     <Button
                       size="small"
                       color="inherit"
                       disabled={activeSetId === flashcardSet.id}
                       onClick={() => openRenameDialog(flashcardSet)}
-                      sx={{ color: 'text.secondary' }}
+                      className="muted-action-button"
                     >
                       Rename
                     </Button>
@@ -294,13 +257,7 @@ export default function Flashcards() {
                       color="error"
                       disabled={activeSetId === flashcardSet.id}
                       onClick={() => openDeleteDialog(flashcardSet)}
-                      sx={{
-                        color: 'error.main',
-                        '&:hover': {
-                          bgcolor: 'rgba(244, 67, 54, 0.08)',
-                          boxShadow: '0 0 0 4px rgba(244, 67, 54, 0.12)',
-                        },
-                      }}
+                      className="danger-text-button"
                     >
                       Delete
                     </Button>
@@ -323,7 +280,7 @@ export default function Flashcards() {
               onClick={closeRenameDialog}
               color="inherit"
               disabled={activeSetId === renameTarget?.id}
-              sx={{ color: 'text.secondary' }}
+              className="muted-action-button"
             >
               Cancel
             </Button>
@@ -341,7 +298,7 @@ export default function Flashcards() {
           autoFocus
           fullWidth
           label="Set name"
-          sx={{ mt: 1 }}
+          className="dialog-input"
           value={renameValue}
           onChange={(event) => {
             setRenameValue(event.target.value);
@@ -357,16 +314,7 @@ export default function Flashcards() {
           }}
         />
         {renameError ? (
-          <Box
-            sx={{
-              mt: 2,
-              px: 2,
-              py: 1.5,
-              borderRadius: 4,
-              bgcolor: 'rgba(248, 113, 113, 0.10)',
-              border: '1px solid rgba(248, 113, 113, 0.18)',
-            }}
-          >
+          <Box className="error-panel dialog-error-panel">
             <Typography color="error" variant="body2">
               {renameError}
             </Typography>
@@ -390,7 +338,7 @@ export default function Flashcards() {
               onClick={closeDeleteDialog}
               color="inherit"
               disabled={activeSetId === deleteTarget?.id}
-              sx={{ color: 'text.secondary' }}
+              className="muted-action-button"
             >
               Cancel
             </Button>
@@ -399,12 +347,7 @@ export default function Flashcards() {
               color="error"
               variant="contained"
               disabled={activeSetId === deleteTarget?.id}
-              sx={{
-                bgcolor: 'error.main',
-                '&:hover': {
-                  bgcolor: 'error.dark',
-                },
-              }}
+              className="danger-contained-button"
             >
               {activeSetId === deleteTarget?.id ? 'Deleting...' : 'Delete set'}
             </Button>
@@ -412,15 +355,7 @@ export default function Flashcards() {
         }
       >
         {deleteError ? (
-          <Box
-            sx={{
-              px: 2,
-              py: 1.5,
-              borderRadius: 4,
-              bgcolor: 'rgba(248, 113, 113, 0.10)',
-              border: '1px solid rgba(248, 113, 113, 0.18)',
-            }}
-          >
+          <Box className="error-panel">
             <Typography color="error" variant="body2">
               {deleteError}
             </Typography>

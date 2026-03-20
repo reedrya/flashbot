@@ -12,14 +12,14 @@ export default function SignInPage() {
       title="Welcome back."
       description="Sign in to generate new flashcards, manage your saved sets, and continue your study sessions."
     >
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Box className="auth-fallback-shell">
         {isClerkConfigured ? (
           <SignIn appearance={clerkAppearance} />
         ) : (
-          <Card sx={{ width: '100%', maxWidth: 560, borderRadius: 6 }}>
-            <CardContent sx={{ p: 4 }}>
+          <Card className="auth-fallback-card">
+            <CardContent className="auth-fallback-content">
               <Typography variant="h5">Clerk is not configured yet.</Typography>
-              <Typography sx={{ mt: 2, color: 'text.secondary', lineHeight: 1.8 }}>
+              <Typography className="auth-fallback-copy">
                 Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to your `.env.local`
                 file, then restart the development server.
               </Typography>

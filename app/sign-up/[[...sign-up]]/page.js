@@ -12,14 +12,14 @@ export default function SignUpPage() {
       title="Create your account."
       description="Create an account to save flashcard sets, return to your material, and keep your study workflow organized."
     >
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Box className="auth-fallback-shell">
         {isClerkConfigured ? (
           <SignUp appearance={clerkAppearance} />
         ) : (
-          <Card sx={{ width: '100%', maxWidth: 560, borderRadius: 6 }}>
-            <CardContent sx={{ p: 4 }}>
+          <Card className="auth-fallback-card">
+            <CardContent className="auth-fallback-content">
               <Typography variant="h5">Clerk is not configured yet.</Typography>
-              <Typography sx={{ mt: 2, color: 'text.secondary', lineHeight: 1.8 }}>
+              <Typography className="auth-fallback-copy">
                 Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to your `.env.local`
                 file, then restart the development server.
               </Typography>

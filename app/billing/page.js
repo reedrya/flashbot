@@ -100,7 +100,7 @@ export default function BillingPage() {
       description="Review your current subscription, monthly generation allowance, and saved-set capacity."
     >
       {!isLoaded || isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box className="centered-loader">
           <CircularProgress />
         </Box>
       ) : null}
@@ -123,25 +123,25 @@ export default function BillingPage() {
       {user && billing && !isLoading ? (
         <Grid container spacing={3}>
           <Grid item xs={12} md={7}>
-            <Card sx={{ px: 4, pb: 1.5, height: '100%', borderRadius: 6 }}>
-              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            <Card className="billing-plan-card">
+              <CardContent className="billing-card-content">
                 <Stack spacing={2}>
-                  <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                  <Typography variant="overline" className="section-eyebrow-primary">
                     Current plan
                   </Typography>
                   <Typography variant="h4">{activePlan.name}</Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                  <Typography variant="body1" className="text-secondary-copy billing-copy">
                     {activePlan.description}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  <Typography variant="body2" className="text-secondary-copy">
                     Subscription status: {billing.subscriptionStatus}
                   </Typography>
                   {renewalLabel ? (
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="body2" className="text-secondary-copy">
                       Current period ends on {renewalLabel}.
                     </Typography>
                   ) : null}
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ pt: 1 }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className="billing-actions">
                     {billing.hasPaidAccess ? (
                       <Button variant="contained" onClick={handleManageBilling} disabled={isPortalLoading}>
                         {isPortalLoading ? 'Opening portal...' : 'Manage subscription'}
@@ -151,12 +151,7 @@ export default function BillingPage() {
                         View paid plans
                       </Button>
                     )}
-                    <Button
-                      component={Link}
-                      href="/generate"
-                      variant="outlined"
-                      sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-                    >
+                    <Button component={Link} href="/generate" variant="outlined" className="button-outlined-muted">
                       Open generator
                     </Button>
                   </Stack>
@@ -166,10 +161,10 @@ export default function BillingPage() {
           </Grid>
 
           <Grid item xs={12} md={5}>
-            <Card sx={{ px: 4, py: 2, height: '100%', borderRadius: 6 }}>
-              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            <Card className="billing-usage-card">
+              <CardContent className="billing-card-content">
                 <Stack spacing={2}>
-                  <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+                  <Typography variant="overline" className="section-eyebrow-secondary">
                     Usage this month
                   </Typography>
                   <Typography variant="body1">
@@ -178,7 +173,7 @@ export default function BillingPage() {
                   <Typography variant="body1">
                     {billing.usage.savedSetsUsed} of {formatLimit(billing.usage.savedSetsLimit, 'saved sets')} used
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                  <Typography variant="body2" className="text-secondary-copy billing-copy">
                     Billing period: {billing.usage.currentPeriodKey}
                   </Typography>
                 </Stack>

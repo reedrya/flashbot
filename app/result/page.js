@@ -52,10 +52,10 @@ const ResultPage = () => {
   if (loading) {
     return (
       <AppShell eyebrow="Checkout" title="Loading your purchase details..." description="We are confirming the payment session and preparing the result screen." maxWidth="sm">
-        <Card sx={{ borderRadius: 6 }}>
-          <CardContent sx={{ p: 5, textAlign: 'center' }}>
+        <Card className="result-card">
+          <CardContent className="result-card-content result-card-content-center">
             <CircularProgress />
-            <Typography variant="h6" sx={{ mt: 2.5 }}>
+            <Typography variant="h6" className="result-loading-copy">
               Loading...
             </Typography>
           </CardContent>
@@ -67,8 +67,8 @@ const ResultPage = () => {
   if (error) {
     return (
       <AppShell eyebrow="Checkout" title="We could not retrieve this payment session." description="The payment result is unavailable right now. You can return to the homepage or try the checkout flow again." maxWidth="sm">
-        <Card sx={{ borderRadius: 6 }}>
-          <CardContent sx={{ p: 5, textAlign: 'center' }}>
+        <Card className="result-card">
+          <CardContent className="result-card-content result-card-content-center">
             <Typography variant="h6" color="error">
               {error}
             </Typography>
@@ -85,50 +85,42 @@ const ResultPage = () => {
       description={description}
       maxWidth="sm"
     >
-      <Card sx={{ py: 2, px: 1, borderRadius: 6 }}>
-        <CardContent sx={{ p: 5 }}>
+      <Card className="result-card result-card-spacious">
+        <CardContent className="result-card-content">
           {isSuccessful ? (
             <Stack spacing={2}>
               <Typography variant="h6">Plan activated</Typography>
-              <Box sx={{ p: 2, borderRadius: 4, bgcolor: 'rgba(142, 168, 255, 0.08)', border: '1px solid rgba(142, 168, 255, 0.12)' }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              <Box className="result-state-box">
+                <Typography variant="body2" className="text-secondary-copy">
                   {session?.planId ? `${session.planId.charAt(0).toUpperCase()}${session.planId.slice(1)}` : 'Paid plan'}
                 </Typography>
               </Box>
-              <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+              <Typography variant="body1" className="text-secondary-copy billing-copy">
                 Thank you for your subscription! You can now start using the app with the {session?.planId ? `${session.planId.charAt(0).toUpperCase()}${session.planId.slice(1)}` : 'Paid plan'} plan.
               </Typography>
             </Stack>
           ) : canceled ? (
-            <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+            <Typography variant="body1" className="text-secondary-copy billing-copy">
               {requestedPlanId
                 ? `Your ${requestedPlanId} checkout was canceled before completion.`
                 : 'Your checkout was canceled before completion.'}
             </Typography>
           ) : (
-            <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+            <Typography variant="body1" className="text-secondary-copy billing-copy">
               Please try again from the pricing section or reopen your billing page if the subscription already processed on Stripe.
             </Typography>
           )}
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 4 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className="result-actions">
             <Button variant="contained" onClick={() => router.push('/')}>
               Return home
             </Button>
             {isSuccessful ? (
-              <Button
-                variant="outlined"
-                onClick={() => router.push('/billing')}
-                sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-              >
+              <Button variant="outlined" onClick={() => router.push('/billing')} className="button-outlined-muted">
                 Open billing
               </Button>
             ) : (
-              <Button
-                variant="outlined"
-                onClick={() => router.push('/generate')}
-                sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-              >
+              <Button variant="outlined" onClick={() => router.push('/generate')} className="button-outlined-muted">
                 Open generator
               </Button>
             )}

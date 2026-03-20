@@ -8,11 +8,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Grid,
   Stack,
   TextField,
@@ -20,6 +15,7 @@ import {
 } from '@mui/material';
 import { useUser } from '@clerk/nextjs';
 import AppShell from '@/components/AppShell';
+import ThemedDialog from '@/components/ThemedDialog';
 
 export default function GenerateClient() {
   const { user, isLoaded } = useUser();
@@ -192,18 +188,16 @@ export default function GenerateClient() {
       eyebrow="Generator"
       title="Create polished flashcards from any study material."
       description="Paste in notes, reading excerpts, or technical concepts and generate a clean set of cards you can review, flip through, and save."
+      descriptionClassName="page-description-generate"
     >
       <Grid container spacing={3.5} className="grid-stagger">
         <Grid item xs={12} md={8}>
-          <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
-            <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
-              <Stack spacing={2.5}>
+          <Card className="generate-main-card">
+            <CardContent className="generate-main-card-content">
+              <Stack spacing={3}>
                 <Box>
                   <Typography variant="h5">Source material</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.8 }}
-                  >
+                  <Typography variant="body1" className="generate-source-copy" sx={{ paddingTop: '0.7rem' }}>
                     Best results come from structured notes, lecture summaries, or concise
                     technical explanations.
                   </Typography>
@@ -224,21 +218,13 @@ export default function GenerateClient() {
                   onClick={handleSubmit}
                   disabled={isGenerating}
                   fullWidth
-                  sx={{ py: 1.5, borderRadius: 3 }}
+                  className="generate-submit-button"
                 >
                   {isGenerating ? 'Generating...' : 'Generate cards'}
                 </Button>
 
                 {error ? (
-                  <Box
-                    sx={{
-                      px: 5,
-                      py: 1.5,
-                      borderRadius: 4,
-                      bgcolor: 'rgba(248, 113, 113, 0.10)',
-                      border: '1px solid rgba(248, 113, 113, 0.18)',
-                    }}
-                  >
+                  <Box className="error-panel">
                     <Typography color="error" variant="body2">
                       {error}
                     </Typography>
@@ -265,72 +251,28 @@ export default function GenerateClient() {
 
         <Grid item xs={12} md={4}>
           <Stack spacing={3}>
-            <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
-              <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
-                <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.08rem' } }}>
+            <Card className="generate-side-card">
+              <CardContent className="generate-side-card-content">
+                <Typography variant="h6" className="generate-side-card-title">
                   What makes a good input?
                 </Typography>
-                <Stack spacing={1.25} sx={{ mt: 2 }}>
-                  <Chip
-                    label="Clear terminology"
-                    sx={{
-                      justifyContent: 'flex-start',
-                      height: 30,
-                      fontSize: '0.74rem',
-                      bgcolor: 'rgba(142, 168, 255, 0.12)',
-                      color: 'primary.main',
-                    }}
-                  />
-                  <Chip
-                    label="Concept-heavy notes"
-                    sx={{
-                      justifyContent: 'flex-start',
-                      height: 30,
-                      fontSize: '0.74rem',
-                      bgcolor: 'rgba(142, 168, 255, 0.12)',
-                      color: 'primary.main',
-                    }}
-                  />
-                  <Chip
-                    label="Short paragraphs or bullets"
-                    sx={{
-                      justifyContent: 'flex-start',
-                      height: 30,
-                      fontSize: '0.74rem',
-                      bgcolor: 'rgba(142, 168, 255, 0.12)',
-                      color: 'primary.main',
-                    }}
-                  />
+                <Stack spacing={1.25} className="generate-chip-list">
+                  <Chip label="Clear terminology" className="generate-tip-chip" />
+                  <Chip label="Concept-heavy notes" className="generate-tip-chip" />
+                  <Chip label="Short paragraphs or bullets" className="generate-tip-chip" />
                 </Stack>
               </CardContent>
             </Card>
 
-            <Card
-              sx={{
-                py: 1,
-                px: 5,
-                borderRadius: 6,
-                background:
-                  'linear-gradient(180deg, rgba(103, 232, 249, 0.10), rgba(17, 24, 45, 0.94))',
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
-                <Typography
-                  variant="overline"
-                  sx={{ color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}
-                >
+            <Card className="generate-side-card generate-preview-card">
+              <CardContent className="generate-side-card-content">
+                <Typography variant="overline" className="section-eyebrow-secondary">
                   Preview
                 </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{ mt: 1, fontSize: { xs: '1.45rem', md: '1.75rem' }, lineHeight: 1.12 }}
-                >
+                <Typography variant="h5" className="generate-preview-title">
                   {flashcards.length > 0 ? `${flashcards.length} cards generated` : 'Ready to generate'}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ py: 1, mt: 1, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.6 }}
-                >
+                <Typography variant="body2" className="generate-preview-copy">
                   Generated cards appear below as interactive tiles. Click any card to flip between
                   question and answer.
                 </Typography>
@@ -338,36 +280,23 @@ export default function GenerateClient() {
             </Card>
 
             {isLoaded && user && billing ? (
-              <Card sx={{ py: 1, px: 5, borderRadius: 6 }}>
-                <CardContent sx={{ p: { xs: 2.5, md: 2.75 } }}>
-                  <Typography
-                    variant="overline"
-                    sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}
-                  >
+              <Card className="generate-side-card">
+                <CardContent className="generate-side-card-content">
+                  <Typography variant="overline" className="section-eyebrow-primary">
                     Plan usage
                   </Typography>
-                  <Typography variant="h6" sx={{ mt: 1 }}>
+                  <Typography variant="h6" className="generate-usage-title">
                     {billing.planName}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ mt: 1, color: 'text.secondary', lineHeight: 1.7 }}
-                  >
+                  <Typography variant="body2" className="generate-usage-copy">
                     {billing.usage.generationsUsed} of {billing.usage.generationsLimit} monthly
                     generations used
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ mt: 0.5, color: 'text.secondary', lineHeight: 1.7 }}
-                  >
+                  <Typography variant="body2" className="generate-usage-copy generate-usage-copy-tight">
                     {billing.usage.savedSetsUsed ?? 0} of {billing.usage.savedSetsLimit ?? 'unlimited'} saved
                     sets used
                   </Typography>
-                  <Button
-                    href="/billing"
-                    variant="outlined"
-                    sx={{ mt: 2, borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-                  >
+                  <Button href="/billing" variant="outlined" className="button-outlined-muted generate-manage-button">
                     Manage billing
                   </Button>
                 </CardContent>
@@ -380,25 +309,21 @@ export default function GenerateClient() {
       </Grid>
 
       {flashcards.length > 0 ? (
-        <Box sx={{ mt: { xs: 5, md: 7 } }} className="reveal reveal-delay-2">
+        <Box className="reveal reveal-delay-2 generate-results-section">
           <Stack
             direction={{ xs: 'column', md: 'row' }}
             spacing={2}
             justifyContent="space-between"
             alignItems={{ xs: 'flex-start', md: 'center' }}
-            sx={{ mb: 3 }}
+            className="generate-results-header"
           >
             <Box>
               <Typography variant="h4">Generated flashcards</Typography>
-              <Typography variant="body1" sx={{ mt: 1, color: 'text.secondary' }}>
+              <Typography variant="body1" className="generate-results-copy">
                 Review the generated set and save it when you are happy with the results.
               </Typography>
             </Box>
-            <Button
-              variant="outlined"
-              onClick={handleOpenDialog}
-              sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-            >
+            <Button variant="outlined" onClick={handleOpenDialog} className="button-outlined-muted">
               Save set
             </Button>
           </Stack>
@@ -406,126 +331,30 @@ export default function GenerateClient() {
           <Grid container spacing={3} className="grid-stagger">
             {flashcards.map((flashcard, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card
-                  onClick={() => handleCardClick(index)}
-                  sx={{
-                    height: 252,
-                    cursor: 'pointer',
-                    borderRadius: 6,
-                    transition: 'transform 0.25s ease, border-color 0.25s ease',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      borderColor: 'rgba(142, 168, 255, 0.3)',
-                    },
-                  }}
-                >
-                  <CardContent sx={{ height: '100%', p: 0 }}>
-                    <Box
-                      sx={{
-                        perspective: '1000px',
-                        position: 'relative',
-                        width: '100%',
-                        height: '100%',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          transition: 'transform 0.6s',
-                          transformStyle: 'preserve-3d',
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            backfaceVisibility: 'hidden',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            p: 2.25,
-                          }}
-                        >
-                          <Typography
-                            variant="overline"
-                            sx={{
-                              px: 7,
-                              pt: 1,
-                              color: 'primary.main',
-                              fontWeight: 700,
-                              letterSpacing: '0.12em',
-                              fontSize: '0.66rem',
-                            }}
-                          >
+                <Card onClick={() => handleCardClick(index)} className="flashcard-tile">
+                  <CardContent className="flashcard-tile-content">
+                    <Box className="flashcard-tile-scene">
+                      <Box className={`flashcard-tile-inner${flipped[index] ? ' is-flipped' : ''}`}>
+                        <Box className="flashcard-tile-face">
+                          <Typography variant="overline" className="flashcard-tile-label flashcard-tile-label-front">
                             Prompt
                           </Typography>
-                          <Typography
-                            variant="body1"
-                            align="center"
-                            sx={{
-                              px: 4,
-                              fontSize: { xs: '0.98rem', md: '1.05rem' },
-                              fontWeight: 600,
-                              lineHeight: 1.4,
-                              overflowWrap: 'anywhere',
-                            }}
-                          >
+                          <Typography variant="body1" align="center" className="flashcard-tile-front-copy">
                             {flashcard.front}
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}
-                          >
+                          <Typography variant="body2" className="flashcard-tile-hint">
                             Click to flip
                           </Typography>
                         </Box>
 
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            p: 2.25,
-                            background:
-                              'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.94))',
-                          }}
-                        >
-                          <Typography
-                            variant="overline"
-                            sx={{
-                              px: 7,
-                              pt: 1,
-                              color: 'secondary.main',
-                              fontWeight: 700,
-                              letterSpacing: '0.12em',
-                              fontSize: '0.66rem',
-                            }}
-                          >
+                        <Box className="flashcard-tile-face flashcard-tile-face-back">
+                          <Typography variant="overline" className="flashcard-tile-label flashcard-tile-label-back">
                             Answer
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            align="center"
-                            sx={{
-                              px: 4,
-                              fontSize: '0.86rem',
-                              lineHeight: 1.55,
-                              overflowWrap: 'anywhere',
-                            }}
-                          >
+                          <Typography variant="body2" align="center" className="flashcard-tile-back-copy">
                             {flashcard.back}
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ px: 5, color: 'text.secondary', fontSize: '0.74rem' }}
-                          >
+                          <Typography variant="body2" className="flashcard-tile-hint">
                             Click to flip back
                           </Typography>
                         </Box>
@@ -539,31 +368,32 @@ export default function GenerateClient() {
         </Box>
       ) : null}
 
-      <Dialog
+      <ThemedDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        PaperProps={{
-          sx: {
-            px: 5,
-            py: 3,
-            borderRadius: 6,
-            border: '1px solid rgba(148, 163, 184, 0.14)',
-            background: 'rgba(11, 16, 32, 0.94)',
-            minWidth: { xs: 'auto', sm: 480 },
-          },
-        }}
+        eyebrow="Generator"
+        title="Save flashcard set"
+        actions={
+          <>
+            <Button onClick={handleCloseDialog} color="inherit" className="muted-action-button">
+              Cancel
+            </Button>
+            <Button onClick={saveFlashcards} variant="contained" disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save set'}
+            </Button>
+          </>
+        }
       >
-        <DialogTitle>Save flashcard set</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: 'text.secondary', mb: 2 }}>
+          <Typography variant="body2" className="text-secondary-copy themed-dialog-helper">
             Give this set a clear name so it is easy to find later.
-          </DialogContentText>
+          </Typography>
           <TextField
             autoFocus
             margin="dense"
             label="Set name"
             type="text"
             fullWidth
+            className="dialog-input"
             value={setName}
             onChange={(e) => {
               setSetName(e.target.value);
@@ -573,31 +403,13 @@ export default function GenerateClient() {
             }}
           />
           {saveError ? (
-            <Box
-              sx={{
-                mt: 2,
-                px: 2,
-                py: 1.5,
-                borderRadius: 4,
-                bgcolor: 'rgba(248, 113, 113, 0.10)',
-                border: '1px solid rgba(248, 113, 113, 0.18)',
-              }}
-            >
+            <Box className="error-panel dialog-error-panel">
               <Typography color="error" variant="body2">
                 {saveError}
               </Typography>
             </Box>
           ) : null}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={handleCloseDialog} color="inherit" sx={{ color: 'text.secondary' }}>
-            Cancel
-          </Button>
-          <Button onClick={saveFlashcards} variant="contained" disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save set'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      </ThemedDialog>
     </AppShell>
   );
 }

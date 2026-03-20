@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, Chip, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } from '@mui/material';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import DrawIcon from '@mui/icons-material/Draw';
 import { useUser } from '@clerk/nextjs';
@@ -188,43 +188,29 @@ export default function Home() {
 
   return (
     <AppShell maxWidth="lg">
-      <Box sx={{ display: 'grid', gap: { xs: 6, md: 10 } }}>
+      <Box className="content-grid-lg">
         <ScrollReveal className="scroll-reveal scroll-reveal-delay-1">
           <Grid container spacing={4} alignItems="flex-start">
             <Grid item xs={12} md={7}>
               <Stack spacing={3}>
-                <Chip
-                  label="AI Flashcard Set Generator"
-                  sx={{
-                    alignSelf: 'flex-start',
-                    px: 1,
-                    bgcolor: 'rgba(142, 168, 255, 0.14)',
-                    color: 'primary.main',
-                    border: '1px solid rgba(142, 168, 255, 0.18)',
-                  }}
-                />
-                <Typography variant="h1" sx={{ fontSize: { xs: '3rem', md: '5rem' }, maxWidth: 760 }}>
+                <Chip label="AI Flashcard Set Generator" className="home-hero-chip" />
+                <Typography variant="h2" className="home-hero-title">
                   Smarter flashcards for faster learning.
                 </Typography>
-                <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 640, lineHeight: 1.8 }}>
+                <Typography variant="h6" className="home-hero-copy">
                   FlashBot turns raw notes into clean, review-ready flashcards so you can spend less time formatting material and more time studying it.
                 </Typography>
-                <Stack sx={{ pb: 0 }} direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                   <Button component={Link} href="/generate" variant="contained" size="large">
                     Start generating
                   </Button>
-                  <Button
-                    component="a"
-                    href="#pricing"
-                    variant="outlined"
-                    size="large"
-                    sx={{ borderColor: 'rgba(148, 163, 184, 0.18)', color: 'text.primary' }}
-                  >
+                  <Button component="a" href="#pricing" variant="outlined" size="large" className="button-outlined-muted">
                     View pricing
                   </Button>
                 </Stack>
                 <Box
                   className="tech-stack-container"
+                  data-open={isTechStackOpen}
                   onMouseLeave={() => setIsTechStackOpen(false)}
                   onFocusCapture={() => setIsTechStackOpen(true)}
                   onBlurCapture={(event) => {
@@ -232,16 +218,8 @@ export default function Home() {
                       setIsTechStackOpen(false);
                     }
                   }}
-                  sx={{
-                    position: 'relative',
-                    display: 'inline-flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    overflow: 'visible',
-                    minWidth: 'auto',
-                  }}
                 >
-                  <Stack spacing={2} sx={{ position: 'relative', zIndex: 1 }}>
+                  <Stack spacing={2} className="tech-stack-inner">
                     <Stack
                       direction={{ xs: 'column', sm: 'row' }}
                       spacing={1}
@@ -255,51 +233,11 @@ export default function Home() {
                         tabIndex={0}
                         className="tech-stack-trigger"
                         onMouseEnter={() => setIsTechStackOpen(true)}
-                        sx={{
-                          px: 2.5,
-                          py: 2,
-                          borderRadius: 999,
-                          bgcolor: 'rgba(15, 23, 42, 0.98)',
-                          border: '1px solid rgba(142, 168, 255, 0.9)',
-                          color: 'primary.main',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          cursor: 'pointer',
-                          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.9)',
-                          '&:hover': {
-                            backgroundColor: 'rgba(15, 23, 42, 1)',
-                            borderColor: 'rgba(191, 219, 254, 1)',
-                          },
-                          '&:focus-visible': {
-                            boxShadow: '0 0 0 2px rgba(191, 219, 254, 0.9)',
-                          },
-                        }}
                       >
                         Tech stack
                       </Box>
                     </Stack>
-                    <Box
-                      className="tech-stack-grid"
-                      sx={{
-                        pt: 0.5,
-                        display: 'grid',
-                        gridTemplateColumns: {
-                          xs: '1fr',
-                          sm: 'repeat(2, minmax(0, 1fr))',
-                          lg: 'repeat(3, minmax(0, 1fr))',
-                        },
-                        gap: 1.25,
-                        maxHeight: isTechStackOpen ? 360 : 0,
-                        opacity: isTechStackOpen ? 1 : 0,
-                        transform: isTechStackOpen ? 'translateY(0)' : 'translateY(-6px)',
-                        overflow: 'hidden',
-                        pointerEvents: isTechStackOpen ? 'auto' : 'none',
-                        transition:
-                          'max-height 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease-out, transform 0.35s ease-out',
-                      }}
-                    >
+                    <Box className="tech-stack-grid">
                       {techStack.map((tool) => (
                         <Box
                           key={tool.name}
@@ -308,45 +246,17 @@ export default function Home() {
                           target="_blank"
                           rel="noopener"
                           aria-label={tool.name}
-                          sx={{
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1.5,
-                            px: 1.5,
-                            py: 1.35,
-                            borderRadius: 3,
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025))',
-                            border: '1px solid rgba(148, 163, 184, 0.12)',
-                            backdropFilter: 'blur(14px)',
-                            transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
-                            '&:hover': {
-                              transform: 'translateY(-2px)',
-                              borderColor: tool.accent,
-                              boxShadow: `0 16px 32px ${tool.accent}22`,
-                            },
-                          }}
+                          className="tech-stack-link"
+                          style={{ '--tech-accent': tool.accent }}
                         >
-                          <Box
-                            sx={{
-                              width: 42,
-                              height: 42,
-                              borderRadius: 2.5,
-                              display: 'grid',
-                              placeItems: 'center',
-                              bgcolor: 'rgba(255,255,255,0.08)',
-                              border: '1px solid rgba(255,255,255,0.08)',
-                              flexShrink: 0,
-                            }}
-                          >
+                          <Box className="tech-stack-icon">
                             {tool.logo}
                           </Box>
-                          <Box sx={{ minWidth: 0 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#fff' }}>
+                          <Box className="tech-stack-copy">
+                            <Typography variant="body2" className="tech-stack-name">
                               {tool.name}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            <Typography variant="caption" className="tech-stack-category">
                               {tool.category}
                             </Typography>
                           </Box>
@@ -359,48 +269,34 @@ export default function Home() {
             </Grid>
 
             <Grid item xs={12} md={5}>
-              <Card
-                className="float-card"
-                sx={{
-                  borderRadius: 1,
-                  background: 'linear-gradient(180deg, rgba(17, 24, 45, 0.96), rgba(9, 14, 26, 0.94))',
-                }}
-              >
-                <Stack direction="row" spacing={1} sx={{ pl: 2.5, pt: 2, pb: 1 }}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fb7185' }} />
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#fbbf24' }} />
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#34d399' }} />
+              <Card className="float-card home-preview-card">
+                <Stack direction="row" spacing={1} className="home-preview-window">
+                  <Box className="window-dot window-dot-rose" />
+                  <Box className="window-dot window-dot-amber" />
+                  <Box className="window-dot window-dot-green" />
                 </Stack>
-                <CardContent sx={{ px: { xs: 3.75, md: 4.25 }, py: { xs: 2.75, md: 3.25 } }}>
+                <CardContent className="home-preview-card-content">
                   <Stack spacing={3}>
-                    <Stack spacing={1.1}>
+                    <Stack spacing={0.2}>
                       <Stack direction="row" alignItems="center" spacing={1.25}>
-                        <DrawIcon sx={{ color: 'secondary.main', fontSize: 18, opacity: 0.95 }} />
-                        <Typography variant="overline" sx={{ color: 'secondary.main', lineHeight: 1 }}>
+                        <DrawIcon className="home-preview-icon home-preview-icon-secondary" />
+                        <Typography variant="overline" className="home-preview-label home-preview-label-secondary">
                           Input
                         </Typography>
                       </Stack>
                       <Box className="input-preview-shell">
                         <Box className="input-preview-field">
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              m: 0,
-                              color: 'rgba(226, 232, 240, 0.9)',
-                              lineHeight: 1.7,
-                              fontSize: '0.95rem',
-                            }}
-                          >
+                          <Typography variant="body1" sx={{ fontSize: '0.97rem', lineHeight: '1.7', color: 'rgba(226, 232, 240, 0.9)' }}>
                             <TypingEffect text="Neural networks learn patterns by adjusting weights during training and using those learned patterns to make predictions on unseen data." />
                           </Typography>
                         </Box>
                       </Box>
                     </Stack>
-                    <Stack spacing={1.1} sx={{ pt: 2 }}>
+                    <Stack spacing={0.2} className="home-preview-output">
                       <Stack direction="row" alignItems="center" justifyContent="space-between">
                         <Stack direction="row" spacing={1.25} alignItems="center">
-                          <AutoAwesomeOutlinedIcon sx={{ color: 'primary.main', fontSize: 18, opacity: 0.9 }} />
-                          <Typography variant="overline" sx={{ color: 'primary.main', lineHeight: 1 }}>
+                          <AutoAwesomeOutlinedIcon className="home-preview-icon home-preview-icon-primary" />
+                          <Typography variant="overline" className="home-preview-label home-preview-label-primary">
                             Output
                           </Typography>
                         </Stack>
@@ -436,7 +332,7 @@ export default function Home() {
                             </Box>
                           </Box>
                         </Box>
-                        <Typography variant="caption" className="output-flip-hint" sx={{ pt: 1.5 }}>
+                        <Typography variant="caption" className="output-flip-hint">
                           Hover or focus to flip
                         </Typography>
                       </Stack>
@@ -450,8 +346,8 @@ export default function Home() {
 
         <ScrollReveal className="scroll-reveal scroll-reveal-delay-2">
           <Box>
-            <Stack spacing={1} sx={{ mb: -4.5, mt: -5}}>
-              <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+            <Stack spacing={1} className="home-section-intro">
+              <Typography variant="overline" className="section-eyebrow-primary">
                 How it works
               </Typography>
               <Typography variant="h3">Paste, review, save.</Typography>
@@ -462,30 +358,18 @@ export default function Home() {
         <ScrollReveal className="scroll-stagger" threshold={0.12}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Card sx={{ height: '100%', borderRadius: 6 }}>
-                <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
-                  <Typography variant="overline" sx={{ pl: 4, color: 'secondary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+              <Card className="home-steps-card">
+                <CardContent className="home-steps-card-content">
+                  <Typography variant="overline" className="section-eyebrow-secondary home-steps-eyebrow">
                     Product flow
                   </Typography>
-                  <Stack spacing={1.75} sx={{ pl: 3, pb: 1, mt: 1.75 }}>
+                  <Stack spacing={1.75} className="home-steps-list">
                     {workflow.map((step, index) => (
-                      <Box key={step} sx={{ px: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            bgcolor: 'rgba(142, 168, 255, 0.16)',
-                            color: 'primary.main',
-                            display: 'grid',
-                            placeItems: 'center',
-                            fontWeight: 700,
-                            flexShrink: 0,
-                          }}
-                        >
+                      <Box key={step} className="home-step-item">
+                        <Box className="home-step-number">
                           {index + 1}
                         </Box>
-                        <Typography variant="body2" sx={{ fontSize: '0.88rem', lineHeight: 1.6, color: 'text.secondary', pt: 0.45 }}>
+                        <Typography variant="body2" className="home-step-copy">
                           {step}
                         </Typography>
                       </Box>
@@ -495,15 +379,15 @@ export default function Home() {
               </Card>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Card sx={{ height: '100%', borderRadius: 6, background: 'linear-gradient(180deg, rgba(142, 168, 255, 0.12), rgba(17, 24, 45, 0.92))' }}>
-                <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
-                  <Typography variant="overline" sx={{ px: 3, color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+              <Card className="home-focus-card">
+                <CardContent className="home-focus-card-content">
+                  <Typography variant="overline" className="section-eyebrow-primary home-focus-eyebrow">
                     Built for daily use
                   </Typography>
-                  <Typography variant="h5" sx={{ px: 2.5, mt: 1.25, fontSize: { xs: '1.45rem', md: '1.8rem' }, lineHeight: 1.12 }}>
+                  <Typography variant="h5" className="home-focus-title">
                     A focused interface that keeps the study session moving.
                   </Typography>
-                  <Typography variant="body2" sx={{ px: 2.5, pb: 1, mt: 1.25, color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
+                  <Typography variant="body2" className="home-focus-copy">
                     FlashBot is designed to help you move quickly from collecting information to actively reviewing it, with less setup and less visual noise.
                   </Typography>
                 </CardContent>
@@ -514,18 +398,18 @@ export default function Home() {
 
         <Box id="pricing">
           <ScrollReveal className="scroll-reveal scroll-reveal-delay-3">
-            <Stack spacing={1.5} sx={{ mb: 4 }}>
-              <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em' }}>
+            <Stack spacing={1.5} className="pricing-intro">
+              <Typography variant="overline" className="section-eyebrow-primary">
                 Pricing
               </Typography>
               <Typography variant="h3">Choose the plan that fits your study routine.</Typography>
               {billing ? (
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                <Typography variant="body1" className="text-secondary-copy">
                   You are currently on the {billing.planName} plan with {billing.usage.generationsRemaining ?? 'unlimited'} generations remaining this month.
                 </Typography>
               ) : (
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  Start on the free tier, then upgrade when you want more monthly generations and saved-set capacity.
+                <Typography variant="body1" className="text-secondary-copy">
+                  Upgrade when you want more monthly generations and saved-set capacity.
                 </Typography>
               )}
             </Stack>
@@ -534,44 +418,34 @@ export default function Home() {
             <Grid container spacing={3}>
               {pricingPlans.map((plan) => (
                 <Grid item xs={12} md={4} key={plan.name}>
-                  <Card
-                    sx={{
-                      px: 3,
-                      py: 1,
-                      height: '100%',
-                      borderRadius: 6,
-                      background: plan.featured
-                        ? 'linear-gradient(180deg, rgba(142, 168, 255, 0.18), rgba(17, 24, 45, 0.94))'
-                        : 'rgba(17, 24, 45, 0.88)',
-                    }}
-                  >
-                    <CardContent sx={{ px: { xs: 4, md: 4.25 }, py: { xs: 3, md: 3.25 } }}>
+                  <Card className={`pricing-card${plan.featured ? ' pricing-card-featured' : ''}`}>
+                    <CardContent className="pricing-card-content">
                       {(() => {
                         const buttonProps = getPlanButtonProps(plan);
 
                         return (
                           <Stack spacing={1.75}>
                             <Box>
-                              <Typography variant="h6" sx={{ fontSize: { xs: '1.15rem', md: '1.25rem' } }}>
+                              <Typography variant="h6" className="pricing-card-name">
                                 {plan.name}
                               </Typography>
-                              <Typography variant="h4" sx={{ mt: 0.5, fontSize: { xs: '1.95rem', md: '2.2rem' }, lineHeight: 1.02 }}>
+                              <Typography variant="h4" className="pricing-card-price">
                                 {plan.priceLabel}
-                                <Typography component="span" variant="body1" sx={{ color: 'text.secondary', ml: 0.75, fontSize: '0.95rem' }}>
+                                <Typography component="span" variant="body1" className="pricing-card-price-suffix">
                                   {plan.priceSuffix}
                                 </Typography>
                               </Typography>
                             </Box>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.65 }}>
+                            <Typography variant="body2" className="pricing-card-description">
                               {plan.description}
                             </Typography>
-                            <Stack spacing={0.75}>
+                            <Stack spacing={0.75} className="pricing-card-benefits">
                               {plan.benefits.map((benefit) => (
-                                <Typography key={benefit} variant="body2" sx={{ color: 'text.secondary' }}>
+                                <Typography key={benefit} variant="body2" className="pricing-card-benefit">
                                   {benefit}
                                 </Typography>
                               ))}
-                              <Typography variant="body2" sx={{ color: 'primary.main' }}>
+                              <Typography variant="body2" className="pricing-card-limit">
                                 {isUnlimitedLimit(plan.limits.maxSavedSets)
                                   ? 'Unlimited saved sets'
                                   : `${plan.limits.maxSavedSets} saved sets max`}
@@ -583,14 +457,7 @@ export default function Home() {
                               href={buttonProps.href}
                               onClick={buttonProps.onClick}
                               disabled={buttonProps.disabled}
-                              sx={
-                                plan.featured
-                                  ? {}
-                                  : {
-                                      borderColor: 'rgba(148, 163, 184, 0.18)',
-                                      color: 'text.primary',
-                                    }
-                              }
+                              className={plan.featured ? '' : 'button-outlined-muted'}
                             >
                               {buttonProps.label}
                             </Button>
