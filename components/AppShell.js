@@ -20,10 +20,19 @@ export default function AppShell({
   title,
   description,
   eyebrow,
+  titleClassName,
   descriptionClassName,
   maxWidth = 'lg',
 }) {
   const pathname = usePathname();
+  const isMySetsActive =
+    pathname === '/flashcards' ||
+    pathname.startsWith('/flashcards/') ||
+    pathname === '/flashcard' ||
+    pathname.startsWith('/flashcard/');
+  const isBillingActive = pathname === '/billing' || pathname.startsWith('/billing/');
+  const isSignInActive = pathname.startsWith('/sign-in');
+  const isSignUpActive = pathname.startsWith('/sign-up');
   const navContainerRef = useRef(null);
   const navButtonRefs = useRef({});
   const [navHighlight, setNavHighlight] = useState(lastNavHighlight);
@@ -130,10 +139,20 @@ export default function AppShell({
               <>
                 <SignedOut>
                   <Stack direction="row" spacing={1.25} className="app-auth-links">
-                    <Button component={Link} href="/sign-in" color="inherit" className="app-muted-link">
+                    <Button
+                      component={Link}
+                      href="/sign-in"
+                      color="inherit"
+                      className={`app-muted-link${isSignInActive ? ' is-active' : ''}`}
+                    >
                       Sign in
                     </Button>
-                    <Button component={Link} href="/sign-up" variant="contained">
+                    <Button
+                      component={Link}
+                      href="/sign-up"
+                      variant="contained"
+                      className={isSignUpActive ? 'is-active' : undefined}
+                    >
                       Create account
                     </Button>
                   </Stack>
@@ -144,10 +163,8 @@ export default function AppShell({
                       component={Link}
                       href="/flashcards"
                       color="inherit"
-                      variant={pathname === '/flashcards' || pathname === '/flashcard' ? 'contained' : 'text'}
-                      className={`app-section-link${
-                        pathname === '/flashcards' || pathname === '/flashcard' ? ' is-active' : ''
-                      }`}
+                      variant={isMySetsActive ? 'contained' : 'text'}
+                      className={`app-section-link${isMySetsActive ? ' is-active' : ''}`}
                     >
                       My Sets
                     </Button>
@@ -155,8 +172,8 @@ export default function AppShell({
                       component={Link}
                       href="/billing"
                       color="inherit"
-                      variant={pathname === '/billing' ? 'contained' : 'text'}
-                      className={`app-section-link app-plan-link${pathname === '/billing' ? ' is-active' : ''}`}
+                      variant={isBillingActive ? 'contained' : 'text'}
+                      className={`app-section-link app-plan-link${isBillingActive ? ' is-active' : ''}`}
                     >
                       Plan
                     </Button>
@@ -168,10 +185,20 @@ export default function AppShell({
               </>
             ) : (
               <Stack direction="row" spacing={1.25} className="app-auth-links">
-                <Button component={Link} href="/sign-in" color="inherit" className="app-muted-link">
+                <Button
+                  component={Link}
+                  href="/sign-in"
+                  color="inherit"
+                  className={`app-muted-link${isSignInActive ? ' is-active' : ''}`}
+                >
                   Sign in
                 </Button>
-                <Button component={Link} href="/sign-up" variant="contained">
+                <Button
+                  component={Link}
+                  href="/sign-up"
+                  variant="contained"
+                  className={isSignUpActive ? 'is-active' : undefined}
+                >
                   Create account
                 </Button>
               </Stack>
@@ -189,7 +216,10 @@ export default function AppShell({
                   {eyebrow}
                 </Typography>
               ) : null}
-              <Typography variant="h2" className="page-title">
+              <Typography
+                variant="h2"
+                className={`page-title${titleClassName ? ` ${titleClassName}` : ''}`}
+              >
                 {title}
               </Typography>
               {description ? (

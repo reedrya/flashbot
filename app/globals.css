@@ -745,14 +745,22 @@ body::after {
   transform: translateY(-1px);
 }
 
-.app-nav-button.is-active,
-.app-section-link.is-active {
+.app-nav-button.is-active {
   color: #08111f !important;
 }
 
-.app-nav-button.is-active:hover,
-.app-section-link.is-active:hover {
+.app-section-link.is-active {
+  color: #08111f !important;
+  background: #8ea8ff !important;
+  box-shadow: 0 12px 28px rgba(142, 168, 255, 0.22);
+}
+
+.app-nav-button.is-active:hover {
   background: transparent;
+}
+
+.app-section-link.is-active:hover {
+  background: #8ea8ff !important;
 }
 
 .app-toolbar-spacer {
@@ -767,6 +775,15 @@ body::after {
 .app-muted-link,
 .muted-action-button {
   color: rgba(226, 232, 240, 0.72) !important;
+}
+
+.app-muted-link.is-active {
+  background: #8ea8ff !important;
+  color: #08111f !important;
+}
+
+.app-muted-link.is-active:hover {
+  background: #8ea8ff !important;
 }
 
 .app-user-actions {
@@ -818,6 +835,11 @@ body::after {
   line-height: 1.05;
 }
 
+.page-title-generate {
+  font-size: 3rem !important;
+  line-height: 1.12;
+}
+
 .page-description,
 .text-secondary-copy {
   color: rgba(226, 232, 240, 0.74);
@@ -828,9 +850,9 @@ body::after {
   margin-top: 1rem;
 }
 
-/* Slightly more breathing room between Generator title and description. */
 .page-description-generate {
   margin-top: 1.6rem !important;
+  font-size: 1rem !important;
 }
 
 .auth-layout {
@@ -1215,7 +1237,6 @@ body::after {
 .home-steps-card-content,
 .home-focus-card-content,
 .pricing-card-content,
-.generate-main-card-content,
 .generate-side-card-content,
 .billing-card-content,
 .result-card-content {
@@ -1330,8 +1351,38 @@ body::after {
 
 /* Generator and flashcard views */
 
+/* if error bubble is present, the card bottom padding should be 0rem*/
 .generate-main-card {
-  padding: 0rem 0.75rem 0.75rem;
+  padding: 0rem 0.75rem 2.4rem;
+}
+
+/* Fixed-height slot so the card bottom stays aligned when errors / upgrade UI appear */
+.generate-main-card-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 4.25rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 600px) {
+  .generate-main-card-messages {
+    height: 9.25rem;
+    min-height: 9.25rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 900px) {
+  .generate-main-card-messages {
+    height: 10.5rem;
+    min-height: 10.5rem;
+  }
+}
+
+.generate-main-card-upgrade-alert {
+  margin: 0 !important;
 }
 
 .generate-source-copy,
@@ -1349,6 +1400,7 @@ body::after {
 .generate-submit-button {
   padding-top: 0.75rem !important;
   padding-bottom: 0.75rem !important;
+  margin-top: 2rem !important;
   border-radius: 0.75rem !important;
 }
 
@@ -1478,7 +1530,7 @@ body::after {
 }
 
 .flashcard-tile-label {
-  padding: 0.25rem 1.75rem 0;
+  padding: 0.1rem 0.7rem 0;
   font-weight: 700;
   letter-spacing: 0.12em;
   font-size: 0.66rem;
@@ -1511,7 +1563,7 @@ body::after {
 }
 
 .flashcard-tile-hint {
-  padding: 0 1.5rem;
+  padding: 0 0.7rem;
   color: rgba(226, 232, 240, 0.74);
   font-size: 0.74rem;
 }
@@ -1541,7 +1593,7 @@ body::after {
 
 .library-set-card-content {
   width: 100%;
-  padding: 2rem 3rem !important;
+  padding: 2rem 2rem !important;
 }
 
 .library-set-title {
@@ -1554,7 +1606,7 @@ body::after {
 }
 
 .library-set-actions {
-  padding: 0 2.25rem 1rem;
+  padding: 0 1rem 1rem;
 }
 
 /* Billing and checkout */

@@ -186,15 +186,17 @@ export default function GenerateClient() {
   return (
     <AppShell
       eyebrow="Generator"
-      title="Create polished flashcards from any study material."
+      title ="Create polished flashcards from any study material."
+      titleClassName="page-title-generate"
       description="Paste in notes, reading excerpts, or technical concepts and generate a clean set of cards you can review, flip through, and save."
       descriptionClassName="page-description-generate"
     >
       <Grid container spacing={3.5} className="grid-stagger">
         <Grid item xs={12} md={8}>
-          <Card className="generate-main-card">
-            <CardContent className="generate-main-card-content">
-              <Stack spacing={3}>
+          <Stack spacing={2}>
+            <Card className="generate-main-card">
+              <CardContent className="generate-main-card-content">
+                <Stack spacing={3}>
                 <Box>
                   <Typography variant="h5">Source material</Typography>
                   <Typography variant="body1" className="generate-source-copy" sx={{ paddingTop: '0.7rem' }}>
@@ -223,30 +225,31 @@ export default function GenerateClient() {
                   {isGenerating ? 'Generating...' : 'Generate cards'}
                 </Button>
 
-                {error ? (
-                  <Box className="error-panel">
-                    <Typography color="error" variant="body2">
-                      {error}
-                    </Typography>
-                  </Box>
-                ) : null}
+                  {upgradePrompt ? (
+                    <Alert
+                      severity="info"
+                      action={
+                        <Button href="/billing" color="inherit" size="small">
+                          Upgrade
+                        </Button>
+                      }
+                    >
+                      Upgrade your plan to raise your{' '}
+                      {upgradePrompt === 'saved_sets' ? 'saved set' : 'generation'} limit.
+                    </Alert>
+                  ) : null}
+                </Stack>
+              </CardContent>
+            </Card>
 
-                {upgradePrompt ? (
-                  <Alert
-                    severity="info"
-                    action={
-                      <Button href="/billing" color="inherit" size="small">
-                        Upgrade
-                      </Button>
-                    }
-                  >
-                    Upgrade your plan to raise your{' '}
-                    {upgradePrompt === 'saved_sets' ? 'saved set' : 'generation'} limit.
-                  </Alert>
-                ) : null}
-              </Stack>
-            </CardContent>
-          </Card>
+            {error ? (
+              <Box className="error-panel">
+                <Typography color="error" variant="body2">
+                  {error}
+                </Typography>
+              </Box>
+            ) : null}
+          </Stack>
         </Grid>
 
         <Grid item xs={12} md={4}>
