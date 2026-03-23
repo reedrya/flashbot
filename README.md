@@ -25,8 +25,8 @@
   - **[Core Functionality](#core-functionality)**
   - **[Authentication & Billing](#authentication--billing)**
   - **[Plans & Limits](#plans--limits)**
-- **[Tech Stack](#-tech-stack)**
-- **[Application Structure](#-application-structure)**
+- **[Tech Stack](#tech-stack)**
+- **[Application Structure](#application-structure)**
   - **[Pages](#pages)**
   - **[API Routes](#api-routes)**
 - **[Prerequisites](#-prerequisites)**
